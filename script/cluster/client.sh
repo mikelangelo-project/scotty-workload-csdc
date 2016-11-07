@@ -10,13 +10,15 @@ install_docker () {
 	curl -sSL https://get.docker.com/ | sh
 }
 
-if which docker >/dev/null; then
-	echo "\n+++++++++++++++++++++++++++"
-	echo "Docker is already installed"
-	echo "+++++++++++++++++++++++++++\n"
-else
-	echo -e "Installing Docker\n ++++++++++++ "
-	install_docker
+if which docker >/dev/null;
+	then
+                echo "\n+++++++++++++++++++++++++++++++"
+                echo "+ Docker is already installed +"
+                echo "+++++++++++++++++++++++++++++++\n"
+
+	else
+		echo -e "Installing Docker\n ++++++++++++ "
+		install_docker
 fi
 
 docker_daemon=$(sudo netstat -tulpn | grep dockerd | wc -l)

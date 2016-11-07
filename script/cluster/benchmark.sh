@@ -50,10 +50,10 @@ echo "++++++++++++++++++++++++++\n"
 ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 if [ -n "$ps" ]
 then
-	echo "[i] Stopping Previous containers\n"
+	echo "[I] Stopping Previous containers\n"
 	sudo docker -H :4000 stop  $(docker -H :4000 ps --filter "name=dc-" -a -q)
-	echo "\n"	
-	echo "[i] Removing Previous containers\n"
+	iecho "\n"	
+	echo "[I] Removing Previous containers\n"
 	sudo docker -H :4000 rm -f $(docker -H :4000 ps --filter "name=dc-" -a -q) 
 	echo "\n"
 fi
