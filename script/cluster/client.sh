@@ -45,4 +45,4 @@ sleep 5
 #fi
 #sudo docker rm -f $(sudo docker ps -a -q)
 #docker rmi $(sudo docker images -q)
-sudo docker run -d swarm join --advertise=10.254.1.95:2375 consul://10.254.1.106:8500
+sudo docker run -d swarm join --name swarm_client --advertise=10.254.1.95:2375 consul://10.254.1.106:8500

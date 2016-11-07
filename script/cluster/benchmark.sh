@@ -61,7 +61,7 @@ fi
 # Reading number of server from input 
 for i in $(seq 1 1 $1)
 do
-	sudo docker -H :4000 run --name dc-server$i --network $network_name -d cloudsuite/data-caching:server -t 4 -m 4096 -n 550
+	sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i --network $network_name -d cloudsuite/data-caching:server -t 4 -m 4096 -n 550
 	echo "[+] Server $i is ready\n"
 done
 
@@ -69,7 +69,7 @@ echo "\n++++++++++++++++++++++++++"
 echo "+     Creating Client    +"
 echo "++++++++++++++++++++++++++\n" 
 
-sudo docker -H :4000 run -itd --name dc-client -v /home/ubuntu/client:/home/test --net caching_network cloudsuite/data-caching:client bash
+sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /home/ubuntu/client:/home/test --net caching_network cloudsuite/data-caching:client bash
 	echo "[+] Client dc-client is ready\n"
 
 echo "\n++++++++++++++++++++++++++" 

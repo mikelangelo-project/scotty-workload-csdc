@@ -44,16 +44,20 @@ fi
 manager_setup () {
 sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.254.1.106:8500  --cluster-advertise=$manager_ip:2376 &
 sleep 5 
-#machines=$(sudo docker ps -a -q)
-#if [ -n $machines ]
-#	then
-#		sudo docker stop $(sudo docker ps -a -q)
-#fi
-#sudo docker rm -f $(sudo docker ps -a -q)
-#docker rmi $(sudo docker images -q)
 
-sudo docker run -d -p 4000:4000 swarm manage -H :4000 --replication --advertise $manager_ip:4000 consul://10.254.1.106:8500
-sudo docker run -d swarm join --advertise=$manager:2375 consul://10.254.1.106:8500
+ps=$(sudo docker ps --filter "name=swarm_manager" -a -q)
+if [ -n "$ps" ]
+then
+        echo "[i] Stopping Previous containers\n"
+        sudo docker stop  $(docker ps --filter "name=swarm_manager" -a -q)
+        echo "\n"       
+        echo "[i] Removing Previous containers\n"
+        sudo docker rm -f $(docker ps --filter "name=swarm_manager" -a -q)
+        echo "\n"
+fi
+
+sudo docker run -d --name swarm_manager -p 4000:4000 swarm manage -H :4000 --replication --advertise $manager_ip:4000 consul://10.254.1.106:8500
+sudo docker run -d --name swarm_manager_node swarm join --advertise=$manager:2375 consul://10.254.1.106:8500
 }
 
 
