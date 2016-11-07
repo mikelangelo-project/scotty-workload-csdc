@@ -42,7 +42,7 @@ fi
 }
 
 manager_setup () {
-sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.254.1.106:8500  --cluster-advertise=$manager:2376 &
+sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.254.1.106:8500  --cluster-advertise=$manager_ip:2376 &
 sleep 5 
 #machines=$(sudo docker ps -a -q)
 #if [ -n $machines ]
@@ -52,7 +52,7 @@ sleep 5
 #sudo docker rm -f $(sudo docker ps -a -q)
 #docker rmi $(sudo docker images -q)
 
-sudo docker run -d -p 4000:4000 swarm manage -H :4000 --replication --advertise 10.254.1.94:4000 consul://10.254.1.106:8500
+sudo docker run -d -p 4000:4000 swarm manage -H :4000 --replication --advertise $manager_ip:4000 consul://10.254.1.106:8500
 sudo docker run -d swarm join --advertise=$manager:2375 consul://10.254.1.106:8500
 }
 
