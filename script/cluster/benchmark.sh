@@ -22,6 +22,7 @@ Usage: $0 [options]
 -T  | --interval         interval between stats printing (default: 1)
 -D  | --server-memory    size of main memory available to each memcached server in MB (default: 4096)
 -S  | --scaling-factor   dataset scaling factor (default: 30)
+-t  | --duration         runtime of loadtesting in seconds (default: 60 S))
 -g  | --fraction         fraction of requests that are gets (default: 0.8)
 -c  | --connections      total TCP connections (default: 200)
 
@@ -89,7 +90,7 @@ create_client () {
 	echo "+     Creating Client    +"
 	echo "++++++++++++++++++++++++++\n" 
 	
-	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /home/ubuntu/client:/home/test --network $network_name cloudsuite/data-caching:client bash
+	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /home/ubuntu/client:/home/log --network $network_name cloudsuite/data-caching:client bash
 		echo "[+] Client dc-client is ready\n"
 	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && for i in $(seq 1 1 '"$1"'); do echo "dc-server$i, 11211\n" ; done > docker_servers.txt'
 }
@@ -102,8 +103,8 @@ run_benchmark () {
 	
 	
 	# Scaling the dataset and warming up the server
-	
-	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/test/benchmark.log  && ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$C"' -w'"$w"'  >> /home/test/benchmark.log'
+
+	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log  && ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' >> /home/log/benchmark.log  '
 	echo "Benchamark is running in background"
 
 }
@@ -129,9 +130,7 @@ do
 		shift
 		;;
 		-n | --server-no)
-		if [ $2 -ne 0 ]; then
 		n=$2
-		fi
 		shift
 		;;
 		-tt | --server-threats)
@@ -160,6 +159,10 @@ do
 		;;
 		-S | --scaling-factor)
 		S=$2
+		shift
+		;;
+		-t | --duration)
+		t=$2
 		shift
 		;;
 		-g | --fraction)
@@ -192,12 +195,12 @@ done
 
 if [ "$n" = "" ]
 then
-    n=4
+    n=2
 fi
 
 if [ "$tt" = "" ]
 then
-    tt=4
+    tt=2
 fi
 
 if [ "$mm" = "" ]
@@ -212,7 +215,7 @@ fi
 
 if [ "$w" = "" ]
 then
-    w=4
+    w=2
 fi
 
 if [ "$T" = "" ]
@@ -227,12 +230,17 @@ fi
 
 if [ "$S" = "" ]
 then
-    S=30
+    S=2
+fi
+
+if [ "$t" = "" ]
+then
+    t=10
 fi
 
 if [ "$g" = "" ]
 then
-    g="0.8"
+    g=0.8
 fi
 
 if [ "$c" = "" ]
@@ -263,7 +271,7 @@ then
 	echo "     Scaling factor:   $S                "
 	echo "     Fraction:         $g                "
 	echo "     Connections:      $c                "
-	echo "                                         "
+	echo "     Duration:         $t                "
 	echo "                                         "
 	echo "#########################################"
 	
