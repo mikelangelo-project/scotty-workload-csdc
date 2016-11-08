@@ -34,6 +34,7 @@ fi
 
 if [ -n $docker_daemon ]; then
 	sudo pkill dockerd
+	sleep 2
 	if [ -f /var/lock/docker.pid ]; then
 		sudo rm /var/lock/docker.pid
 	fi
