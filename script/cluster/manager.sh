@@ -13,7 +13,13 @@ if which docker >/dev/null;
 		echo "+ Docker is already installed +"
 		echo "+++++++++++++++++++++++++++++++\n"
 	else
-		echo -e "Installing Docker\n ++++++++++++ "
+		echo "\n-------------------------------"
+		echo "-   Docker is not installed   -"
+		echo "-------------------------------\n"
+		
+		echo "\n+++++++++++++++++++++++++++++++"
+		echo "+   Installing Docker .....   +"
+		echo "++++++++++++++++++++++++++++++-\n"
 		yum update
 		curl -sSL https://get.docker.com/ | sh
 fi

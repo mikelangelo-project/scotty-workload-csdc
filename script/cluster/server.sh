@@ -12,14 +12,19 @@ install_docker () {
 
 if which docker >/dev/null;
 	then
-
-                echo "\n+++++++++++++++++++++++++++++++"
-                echo "+ Docker is already installed +"
-                echo "+++++++++++++++++++++++++++++++\n"
-
+		echo "\n+++++++++++++++++++++++++++++++"
+		echo "+ Docker is already installed +"
+		echo "+++++++++++++++++++++++++++++++\n"
 	else
-		echo -e "Installing Docker\n ++++++++++++ "
-		install_docker
+		echo "\n-------------------------------"
+		echo "-   Docker is not installed   -"
+		echo "-------------------------------\n"
+
+		echo "\n+++++++++++++++++++++++++++++++"
+		echo "+   Installing Docker .....   +"
+		echo "++++++++++++++++++++++++++++++-\n"
+	yum update
+	curl -sSL https://get.docker.com/ | sh
 fi
 
 docker_daemon=$(sudo netstat -tulpn | grep dockerd | wc -l)
