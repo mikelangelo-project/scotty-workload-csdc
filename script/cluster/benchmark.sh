@@ -1,4 +1,4 @@
-# name: Automated Creation of Docker Discovery
+# name: Cluster Benchmark using Cloudsiute
 # auth: Mohammad Sahihi <msahihi at gwdg.de>
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 

@@ -1,4 +1,4 @@
-# name: Automated Creation of Docker Discovery 
+# name: Cluster setup for client node
 # auth: Mohammad Sahihi <msahihi at gwdg.de>
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 
@@ -48,4 +48,4 @@ sleep 5
 #fi
 #sudo docker rm -f $(sudo docker ps -a -q)
 #docker rmi $(sudo docker images -q)
-sudo docker run -d swarm join --name swarm_client --advertise=10.254.1.95:2375 consul://10.254.1.106:8500
+sudo docker run -d --name swarm_client swarm join --advertise=10.254.1.95:2375 consul://10.254.1.106:8500
