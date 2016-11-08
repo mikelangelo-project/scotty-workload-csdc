@@ -117,11 +117,11 @@ while :
 do
 	case "$1" in
 		-h | --help)
-		display_usage  # Call your function
+		display_usage
 		exit 0
 		;;
 		-a | --auto)
-		auto=1 # Number of server to create
+		auto=1
 		shift
 		;;
 		-sa | --stop-all)
@@ -130,47 +130,47 @@ do
 		;;
 		-n | --server-no)
 		if [ $2 -ne 0 ]; then
-		n=$2 # Number of server to create
+		n=$2
 		fi
 		shift
 		;;
 		-tt | --server-threats)
-		tt=$2 # Number of server to create
+		tt=$2
 		shift
 		;;
 		-mm | --memory)
-		mm=$2 # Number of server to create
+		mm=$2
 		shift
 		;;
 		-nn | --object-size)
-		nn=$2 # Number of server to create
+		nn=$2
 		shift
 		;;
 		-w | --client-threads)
-		w=$2 # Number of server to create
+		w=$2
 		shift
 		;;
 		-T | --interval)
-		T=$2 # Number of server to create
+		T=$2
 		shift
 		;;
 		-D | --server-memory)
-		D=$2 # Number of server to create
+		D=$2
 		shift
 		;;
 		-S | --scaling-factor)
-		S=$2 # Number of server to create
+		S=$2
 		shift
 		;;
 		-g | --fraction)
-		=$2 # Number of server to create
+		=$2
 		shift
 		;;
 		-c | --connections)
-		c=$2 # Number of server to create
+		c=$2
 		shift
 		;;
-		--) # End of all options
+		--)
 		shift
 		break
 		;;
@@ -181,7 +181,7 @@ do
 		\?)
 		echo "Invalid option"
 		;;
-		*)  # No more options
+		*)
 		break
 		;;
 	esac
