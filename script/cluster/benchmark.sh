@@ -1,8 +1,9 @@
-# name: Cluster Benchmark using Cloudsiute
+# name: Automated Creation of Docker Discovery
 # auth: Mohammad Sahihi <msahihi at gwdg.de>
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 
 #!/bin/bash
+
 
 display_usage() { 
 cat <<EOF
@@ -21,9 +22,11 @@ Usage: $0 [options]
 EOF
 } 
 
-	network_name="caching_network"
-	ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
-	NOFS=4
+# Initial primary variable
+network_name="caching_network"
+ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
+
+
 network () {
 
 
@@ -37,6 +40,7 @@ network () {
 	if [ -z "$network" ];
 		then
 			sudo docker network create --driver overlay $network_name
+			echo "[+] Network created"
 		else
 			echo "[+] Network Exist"
 	fi
@@ -50,7 +54,7 @@ stop_remove_all () {
 	then
 		echo "[I] Stopping Previous containers\n"
 		sudo docker -H :4000 stop  $(docker -H :4000 ps --filter "name=dc-" -a -q)
-		iecho "\n"	
+		echo "\n"	
 		echo "[I] Removing Previous containers\n"
 		sudo docker -H :4000 rm -f $(docker -H :4000 ps --filter "name=dc-" -a -q) 
 		echo "\n"
@@ -67,7 +71,7 @@ create_server () {
 	# Reading number of server from input 
 	for i in $(seq 1 1 $NOFS)
 	do
-		sudo docker -H :4000 run --name dc-server$NOFS --hostname dc-server$i --network $network_name -d cloudsuite/data-caching:server -t 4 -m 4096 -n 550
+		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i --network $network_name -d cloudsuite/data-caching:server -t $NOFS -m $mm -n $nn
 		echo "[+] Server $i is ready\n"
 	done
 
@@ -98,57 +102,90 @@ run_benchmark () {
 
 }
 
-auto () {
+
+
+#################################
+# check command line parameters #
+#################################
+while :
+do
+	case "$1" in
+		-h | --help)
+		display_usage  # Call your function
+		exit 0
+		;;
+		-n | --server-no)
+		if [ $2 -ne 0 ]; then
+		NOFS=$2 # Number of server to create
+		fi
+		shift
+		;;
+		-a | --auto)
+		auto=1 # Number of server to create
+		shift
+		;;
+		-sa | --stop-all)
+		stop_remove_all
+		shift
+		;;
+		-mm | --memory)
+		mm=$2 # Number of server to create
+		shift
+		;;
+		-nn | --bject-size)
+		nn=$2 # Number of server to create
+		shift
+		;;
+		-a | --auto)
+		auto=1 # Number of server to create
+		shift
+		;;
+		-a | --auto)
+		auto=1 # Number of server to create
+		shift
+		;;
+		--) # End of all options
+		shift
+		break
+		;;
+		-*)
+		display_usage
+		exit 1 
+		;;
+		\?)
+		echo "Invalid option"
+		;;
+		*)  # No more options
+		break
+		;;
+	esac
+done
+
+
+
+
+if [ "$NOFS" = "" ]
+then
+    NOFS=4
+fi
+
+if [ "$mm" = "" ]
+then
+    mm=4096
+fi
+
+if [ "$nn" = "" ]
+then
+    nn=550
+fi
+
+if [ "$auto" = 1 ]
+then
 network
 stop_remove_all
 create_server
 create_client
 run_benchmark
-}
-################################
-# Check if parameters options  #
-# are given on the commandline #
-################################
-while :
-do
-    case "$1" in
-	
-	-S | --SERVERS)
-          if [ $# -nie 0 ]; then
-            resolution="$2"   # You may want to check validity of $2
-          fi
-          shift 2
-          ;;
-	-h | --help)
-          display_usage  # Call your function
-          exit 0
-          ;;
-	-C | --CLIENT)
-          display="$2"
-           shift 2
-           ;;
-	-a | --automatic)
-		auto	# Run all steps automatically
-		# and write it in your help function display_help()
-           shift 2
-           ;;
-	-SA | --stop-all)
-		stop_remove_all
-		shift
-		;;
-	--) # End of all options
-          shift
-          break
-          ;;
-	-*)
-          echo "Error: Unknown option: $1" >&2
-          ## or call function display_help
-          exit 1 
-          ;;
-	*)  # No more options
-          break
-          ;;
-    esac
-done
 
+fi
 
