@@ -34,6 +34,7 @@ service_check (){
 if  test "${docker_service#*"running"}" != $docker_service
 	then
 		sudo service docker stop
+		sleep 2
 		if [ -f /var/lock/docker.pid ]; then
 			sudo rm /var/lock/docker.pid
 		fi
@@ -59,15 +60,15 @@ sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluste
 sleep 5 
 
 ps=$(sudo docker ps --filter "name=swarm_manager" -a -q)
-ru=$(sudo docker ps --filter "name=swarm_manager" -a -q)
+ru=$(sudo docker ps --filter "name=swarm_manager" -q)
 
 if [ -n "$ps" ]
 then
         echo "[I] Stopping Previous containers\n"
-        sudo docker stop  $(docker ps --filter "name=swarm_manager" -a -q)
+        sudo docker stop  $ru
         echo "\n"       
         echo "[I] Removing Previous containers\n"
-        sudo docker rm -f $(docker ps --filter "name=swarm_manager" -a -q)
+        sudo docker rm -f $ps
         echo "\n"
 fi
 
