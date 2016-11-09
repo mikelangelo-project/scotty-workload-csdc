@@ -22,7 +22,7 @@ Usage: $0 [options]
 -T  | --interval         interval between stats printing (default: 1)
 -D  | --server-memory    size of main memory available to each memcached server in MB (default: 4096)
 -S  | --scaling-factor   dataset scaling factor (default: 30)
--t  | --duration         runtime of loadtesting in seconds (default: 60 S))
+-t  | --duration         runtime of loadtesting in seconds (default: 60 S)
 -g  | --fraction         fraction of requests that are gets (default: 0.8)
 -c  | --connections      total TCP connections (default: 200)
 
@@ -235,7 +235,7 @@ fi
 
 if [ "$t" = "" ]
 then
-    t=10
+    t=60
 fi
 
 if [ "$g" = "" ]
