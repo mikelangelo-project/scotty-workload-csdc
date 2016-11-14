@@ -22,7 +22,7 @@ Usage: $0 [options]
 -T  | --interval         interval between stats printing (default: 1)
 -D  | --server-memory    size of main memory available to each memcached server in MB (default: 4096)
 -S  | --scaling-factor   dataset scaling factor (default: 30)
--t  | --duration         runtime of loadtesting in seconds (default: 60 S)
+-t  | --duration         runtime of loadtesting in seconds (default: run forever)
 -g  | --fraction         fraction of requests that are gets (default: 0.8)
 -c  | --connections      total TCP connections (default: 200)
 
@@ -103,8 +103,7 @@ run_benchmark () {
 	
 	
 	# Scaling the dataset and warming up the server
-
-	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log  && ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' >> /home/log/benchmark.log  '
+	sudo docker -H :4000 exec -d dc-client bash -c 'if [ -f /home/log/benchmark.log ]; then rm /home/log/benchmark.log; fi && if [ -f /home/log/warmup.log ]; then rm /home/log/warmup.log; fi && cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log  && ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' >> /home/log/benchmark.log  '
 	echo "Benchamark is running in background"
 
 }
@@ -235,7 +234,7 @@ fi
 
 if [ "$t" = "" ]
 then
-    t=60
+    t=0
 fi
 
 if [ "$g" = "" ]
