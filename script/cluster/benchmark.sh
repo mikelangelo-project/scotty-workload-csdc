@@ -3,7 +3,7 @@
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 
 #!/bin/bash
-
+#set -x
 
 display_usage() { 
 cat <<EOF
@@ -100,15 +100,13 @@ run_benchmark () {
 	echo "\n++++++++++++++++++++++++++" 
 	echo "+    Running Benchmark   +"
 	echo "++++++++++++++++++++++++++\n"
-	
-	
+
 	# Scaling the dataset and warming up the server
-	sudo docker -H :4000 exec -d dc-client bash -c 'if [ -f /home/log/benchmark.log ]; then rm /home/log/benchmark.log; fi && if [ -f /home/log/warmup.log ]; then rm /home/log/warmup.log; fi && cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log  && ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' >> /home/log/benchmark.log  '
+	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' > /home/log/warmup.log  && ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' > /home/log/benchmark.log'
 	echo "Benchamark is running in background"
+	
 
 }
-
-
 
 #################################
 # check command line parameters #
@@ -122,58 +120,58 @@ do
 		;;
 		-a | --auto)
 		auto=1
-		shift
+		shift 
 		;;
 		-sa | --stop-all)
 		stop_remove_all
-		shift
+		shift 
 		;;
 		-n | --server-no)
 		n=$2
-		shift
+		shift 2 
 		;;
 		-tt | --server-threats)
 		tt=$2
-		shift
+		shift 2
 		;;
 		-mm | --memory)
 		mm=$2
-		shift
+		shift 2
 		;;
 		-nn | --object-size)
 		nn=$2
-		shift
+		shift 2
 		;;
 		-w | --client-threads)
 		w=$2
-		shift
+		shift 2
 		;;
 		-T | --interval)
 		T=$2
-		shift
+		shift 2
 		;;
 		-D | --server-memory)
 		D=$2
-		shift
+		shift 2
 		;;
 		-S | --scaling-factor)
 		S=$2
-		shift
+		shift 2
 		;;
 		-t | --duration)
 		t=$2
-		shift
+		shift 2
 		;;
 		-g | --fraction)
 		=$2
-		shift
+		shift 2
 		;;
 		-c | --connections)
 		c=$2
-		shift
+		shift 2
 		;;
 		--)
-		shift
+		shift 
 		break
 		;;
 		-*)
