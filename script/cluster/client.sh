@@ -28,7 +28,7 @@ fi
 
 docker_daemon=$(sudo netstat -tulpn | grep dockerd | wc -l)
 docker_service=$(sudo service docker status | cut -d' ' -f2)
-manager_ip=$(ifconfig eth0 | grep "inet addr" | cut -d ':' -f 2 | cut -d ' ' -f 1)
+client_ip=$(ifconfig eth0 | grep "inet addr" | cut -d ':' -f 2 | cut -d ' ' -f 1)
 
 service_check (){
 if  test "${docker_service#*"running"}" != $docker_service
@@ -54,10 +54,10 @@ fi
 client_setup () {
 
 echo "\n+++++++++++++++++++++++++++++++" 
-echo "+  Setting up Swarm manager  +"
+echo "+  Setting up Swarm Client    +"
 echo "+++++++++++++++++++++++++++++++\n" 
 
-sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.254.1.106:8500  --cluster-advertise=10.254.1.95:2376 &
+sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.254.1.106:8500  --cluster-advertise=$client_ip:2376 &
 sleep 5 
 
 ps=$(sudo docker ps --filter "name=swarm_client" -a -q)
@@ -73,7 +73,7 @@ then
         echo "\n"
 fi
 
-sudo docker run -d --name swarm_client swarm join --advertise=10.254.1.95:2375 consul://10.254.1.106:8500
+sudo docker run -d --name swarm_client swarm join --advertise=$client_ip:2375 consul://10.254.1.106:8500
 
 }
 
@@ -92,5 +92,5 @@ sudo touch /var/log/benchmark/detail.csv
 
 docker_check
 service_check
-manager_setup
+client_setup
 prepare_env
