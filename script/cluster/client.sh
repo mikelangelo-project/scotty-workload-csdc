@@ -3,7 +3,7 @@
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 
 #!/bin/bash
-
+set -x
 
 docker_check () {
 	
@@ -77,6 +77,20 @@ sudo docker run -d --name swarm_client swarm join --advertise=10.254.1.95:2375 c
 
 }
 
+prepare_env () {
+
+echo "\n+++++++++++++++++++++++++++++++"
+echo "+    Preparing Environment    +"
+echo "+++++++++++++++++++++++++++++++\n"
+
+sudo mkdir /var/log/benchmark
+sudo bash asset/setup_nfs.sh -r client -ns 10.254.1.104 -nd /var/log/benchmark
+sudo touch /var/log/benchmark/detail.csv
+
+
+}
+
 docker_check
 service_check
 manager_setup
+prepare_env

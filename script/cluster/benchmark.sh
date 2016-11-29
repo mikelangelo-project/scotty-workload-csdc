@@ -33,7 +33,6 @@ EOF
 network_name="caching_network"
 ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 
-
 network () {
 
 
@@ -90,7 +89,7 @@ create_client () {
 	echo "+     Creating Client    +"
 	echo "++++++++++++++++++++++++++\n" 
 	
-	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /home/ubuntu/client:/home/log --network $network_name cloudsuite/data-caching:client bash
+	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /var/log/benchmark/:/home/log --network $network_name cloudsuite/data-caching:client bash
 		echo "[+] Client dc-client is ready\n"
 	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && for i in $(seq 1 1 '"$1"'); do echo "dc-server$i, 11211\n" ; done > docker_servers.txt'
 }
@@ -102,11 +101,14 @@ run_benchmark () {
 	echo "++++++++++++++++++++++++++\n"
 
 	# Scaling the dataset and warming up the server
-	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' > /home/log/warmup.log  && ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' > /home/log/benchmark.log'
+	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' > /home/log/warmup.log  && stdbuf -o0 ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' > /home/log/benchmark.log'
 	echo "Benchamark is running in background"
 	
 
 }
+echo "+++++++++++++++ Tailing Command +++++++++++++++"
+tail -f /var/log/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv
+
 
 #################################
 # check command line parameters #
@@ -187,9 +189,6 @@ do
 	esac
 done
 
-
-
-
 if [ "$n" = "" ]
 then
     n=2
@@ -244,8 +243,6 @@ if [ "$c" = "" ]
 then
     c=200
 fi
-
-
 
 if [ "$auto" = 1 ]
 then

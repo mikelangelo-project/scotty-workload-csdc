@@ -79,7 +79,76 @@ sudo docker run -d --name swarm_manager_node swarm join --advertise=$manager:237
 echo "[+] Swarm manager joined as node\n"
 }
 
+snap_check () {
+
+if which snap >/dev/null;
+         then
+                echo "\n+++++++++++++++++++++++++++++++"
+                echo "+ SNAP is already installed +"
+                echo "+++++++++++++++++++++++++++++++\n"
+        else
+                echo "\n-------------------------------"
+                echo "-   SNAP is not installed   -"
+                echo "-------------------------------\n"
+
+                yum update
+
+                echo "\n+++++++++++++++++++++++++++++++"
+                echo "+   Installing GO .....   +"
+                echo "++++++++++++++++++++++++++++++-\n"
+
+                chmod 700 asset/goinstall.sh
+                bash asset/goinstall.sh --64
+
+                echo "\n+++++++++++++++++++++++++++++++"
+                echo "+   Installing SNAP .....   +"
+                echo "++++++++++++++++++++++++++++++-\n"
+                sudo curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash
+                sudo apt-get install -y snap-telemetry
+                sudo systemctl start snap-telemetry
+fi
+
+}
+
+load_snap_plugin () {
+
+                echo "\n--------------------------------------"
+                echo "-   Loading Collector Plugin .....   -"
+                echo "--------------------------------------\n"
+
+                snapctl plugin unload collector cloudsuite-dc 1
+                snapctl plugin unload publisher mock-file 3
+                snapctl plugin unload processor passthru 1
+		
+		snapctl plugin load asset/snap/snap-plugin-processor-passthru
+		snapctl plugin load asset/snap/snap-plugin-publisher-mock-file
+                snapctl plugin load asset/snap/snap-plugin-collector-cloudsuite-datacaching
+                
+		echo "\n--------------------------------------"
+                echo "-      Creating SNAP Task .....      -"
+                echo "--------------------------------------\n"
+		
+		snapctl task create -t asset/snap/datacahing-task.yaml
+
+}
+
+prepare_env () {
+
+
+echo "\n+++++++++++++++++++++++++++++++"
+echo "+    Preparing Environment    +"
+echo "+++++++++++++++++++++++++++++++\n"
+
+sudo bash /asset/setup_nfs.sh -r server -c clients.txt
+
+sudo touch /var/log/benchmark/detail.csv
+sudo chmod 777 /v/ar/log/benchmark/detail.csv
+
+
+}
 
 docker_check
 service_check
 manager_setup
+prepare_env
+load_snap_plugin
