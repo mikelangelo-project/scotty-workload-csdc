@@ -59,10 +59,10 @@ stop_remove_all () {
 	if [ -n "$ps" ]
 	then
 		echo -e "[I] Stopping Previous containers\n"
-		sudo docker -H :4000 stop  $(docker -H :4000 ps --filter "name=dc-" -a -q)
+		sudo docker -H :4000 stop  $(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 		echo -e "\n"	
 		echo -e "[I] Removing Previous containers\n"
-		sudo docker -H :4000 rm -f $(docker -H :4000 ps --filter "name=dc-" -a -q) 
+		sudo docker -H :4000 rm -f $(sudo docker -H :4000 ps --filter "name=dc-" -a -q) 
 		echo -e "\n"
 	fi
 
