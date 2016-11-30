@@ -36,19 +36,19 @@ ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 network () {
 
 
-	echo "\n++++++++++++++++++++++++++" 
-	echo "+    Creating Network    +"
-	echo "++++++++++++++++++++++++++\n" 
+	echo -e "\n++++++++++++++++++++++++++" 
+	echo -e "+    Creating Network    +"
+	echo -e "++++++++++++++++++++++++++\n" 
 	
-	echo "[+] Netowrk name : data_chaching"
+	echo -e "[+] Netowrk name : data_chaching"
 	
-	network=$(docker network ls -f NAME=$network_name -q)
+	network=$(sudo docker network ls -f NAME=$network_name -q)
 	if [ -z "$network" ];
 		then
 			sudo docker network create --driver overlay $network_name
-			echo "[+] Network created"
+			echo -e "[+] Network created"
 		else
-			echo "[+] Network Exist"
+			echo -e "[+] Network Exist"
 	fi
 
 }
@@ -58,56 +58,54 @@ stop_remove_all () {
 
 	if [ -n "$ps" ]
 	then
-		echo "[I] Stopping Previous containers\n"
+		echo -e "[I] Stopping Previous containers\n"
 		sudo docker -H :4000 stop  $(docker -H :4000 ps --filter "name=dc-" -a -q)
-		echo "\n"	
-		echo "[I] Removing Previous containers\n"
+		echo -e "\n"	
+		echo -e "[I] Removing Previous containers\n"
 		sudo docker -H :4000 rm -f $(docker -H :4000 ps --filter "name=dc-" -a -q) 
-		echo "\n"
+		echo -e "\n"
 	fi
 
 }
 
 create_server () {
 
-	echo "\n++++++++++++++++++++++++++" 
-	echo "+    Creating Servers    +"
-	echo "++++++++++++++++++++++++++\n" 
+	echo -e "\n++++++++++++++++++++++++++" 
+	echo -e "+    Creating Servers    +"
+	echo -e "++++++++++++++++++++++++++\n" 
 	
 	# Reading number of server from input 
 	for i in $(seq 1 1 $n)
 	do
 		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i --network $network_name -d cloudsuite/data-caching:server -t $tt -m $mm -n $nn
-		echo "[+] Server $i is ready\n"
+		echo -e "[+] Server $i is ready\n"
 	done
 
 }
 
 create_client () {
 
-	echo "\n++++++++++++++++++++++++++" 
-	echo "+     Creating Client    +"
-	echo "++++++++++++++++++++++++++\n" 
+	echo -e "\n++++++++++++++++++++++++++" 
+	echo -e "+     Creating Client    +"
+	echo -e "++++++++++++++++++++++++++\n" 
 	
-	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /var/log/benchmark/:/home/log --network $network_name cloudsuite/data-caching:client bash
-		echo "[+] Client dc-client is ready\n"
-	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && for i in $(seq 1 1 '"$1"'); do echo "dc-server$i, 11211\n" ; done > docker_servers.txt'
+	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /var/log/benchmark:/home/log --network $network_name cloudsuite/data-caching:client bash
+		echo -e "[+] Client dc-client is ready\n"
+	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && for i in $(seq 1 1 '"$n"'); do echo -e "dc-server$i, 11211" ; done > docker_servers.txt'
 }
 
 run_benchmark () {
 
-	echo "\n++++++++++++++++++++++++++" 
-	echo "+    Running Benchmark   +"
-	echo "++++++++++++++++++++++++++\n"
+	echo -e "\n++++++++++++++++++++++++++" 
+	echo -e "+    Running Benchmark   +"
+	echo -e "++++++++++++++++++++++++++\n"
 
 	# Scaling the dataset and warming up the server
-	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' > /home/log/warmup.log  && stdbuf -o0 ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' > /home/log/benchmark.log'
-	echo "Benchamark is running in background"
-	
+	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log && stdbuf -o0 ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' >> /home/log/benchmark.log'
 
 }
-echo "+++++++++++++++ Tailing Command +++++++++++++++"
-tail -f /var/log/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv
+
+
 
 
 #################################
@@ -181,9 +179,10 @@ do
 		exit 1 
 		;;
 		\?)
-		echo "Invalid option"
+		echo -e "Invalid option"
 		;;
 		*)
+		display_usage
 		break
 		;;
 	esac
@@ -246,34 +245,38 @@ fi
 
 if [ "$auto" = 1 ]
 then
-	echo "#########################################" 
-	echo "                                         "
-	echo "         Benchmark Environment           "
-	echo "                                         "
-	echo "       -------- Server -------           "
-	echo "                                         "
-	echo "     Number of Server: $n                "
-	echo "     Server Threads:   $tt               "
-	echo "     Dedicated memory: $mm               "
-	echo "     Object Size:      $nn               "
-	echo "                                         "
-	echo "       --------- Client ------           "
-	echo "                                         "
-	echo "     Client threats:   $w                "
-	echo "     Interval:         $T                "
-	echo "     Server memory:    $D                "
-	echo "     Scaling factor:   $S                "
-	echo "     Fraction:         $g                "
-	echo "     Connections:      $c                "
-	echo "     Duration:         $t                "
-	echo "                                         "
-	echo "#########################################"
+	echo -e "#########################################" 
+	echo -e "                                         "
+	echo -e "         Benchmark Environment           "
+	echo -e "                                         "
+	echo -e "       -------- Server -------           "
+	echo -e "                                         "
+	echo -e "     Number of Server: $n                "
+	echo -e "     Server Threads:   $tt               "
+	echo -e "     Dedicated memory: $mm               "
+	echo -e "     Object Size:      $nn               "
+	echo -e "                                         "
+	echo -e "       --------- Client ------           "
+	echo -e "                                         "
+	echo -e "     Client threats:   $w                "
+	echo -e "     Interval:         $T                "
+	echo -e "     Server memory:    $D                "
+	echo -e "     Scaling factor:   $S                "
+	echo -e "     Fraction:         $g                "
+	echo -e "     Connections:      $c                "
+	echo -e "     Duration:         $t                "
+	echo -e "                                         "
+	echo -e "#########################################"
 	
 	network
 	stop_remove_all
 	create_server
 	create_client
 	run_benchmark
+	
+	sudo pkill tail
+	tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
+	echo -e "\n[+] The Benchmark is running in the background\n"
 
 fi
 
