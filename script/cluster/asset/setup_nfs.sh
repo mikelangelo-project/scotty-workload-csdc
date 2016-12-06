@@ -1,10 +1,10 @@
 #!/bin/bash
 #set -x
-set -e
+#set -e
 
 # first input: is it "keystore" or "other"
 # second input: ip of keystore
-IP=$( sudo /sbin/ifconfig eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}' )
+IP=$(ip route get 1 | awk '{print $NF;exit}')
 
 install_nfs_server(){
   existed=$( dpkg -la | grep nfs-kernel-server | head -n1 | awk '{print $1;}' )
@@ -38,7 +38,7 @@ add_host_to_nfs(){
 configure_nfs_server(){
   # $1 address of the file for nfs clients IPs
   echo "--- configuring nfs server..."
-  sudo rm -R /var/log/benchmark
+  #sudo rm -R /var/log/benchmark
   sudo mkdir -m 777 -p /var/log/benchmark
 
   # see the results
@@ -48,10 +48,10 @@ configure_nfs_server(){
 }
 
 start_nfs(){
-  
+
   if [[ $1 == "server" ]]
-  then 
-	install_nfs_server 
+  then
+	install_nfs_server
 	configure_nfs_server ${2}
   fi
   if [[ $1 == "client" ]]
@@ -59,7 +59,7 @@ start_nfs(){
     install_nfs_client
 	mkdir -p -m 0777 ${3}
 	dir_stat=$( stat -f -L -c %R ${3} )
-	if [[ $dir_stat != "nfs" ]];then 
+	if [[ $dir_stat != "nfs" ]];then
       $( sudo mount ${2}:/var/log/benchmark ${3} )
 	fi
   fi
@@ -110,7 +110,7 @@ while test $# -gt 0; do
       shift
 	  ;;
 	-h|--help)
-	  echo "Usage: sudo ./setup.sh <-r ROLE> <-c PATH/TO/FILE> (-h)"
+	  echo "Usage: sudo ${0} <-r ROLE> <-c PATH/TO/FILE> (-h)"
 	  echo "  -r, --role	the role of node, values can be 'server' or 'client'"
 	  echo "  -c, --clients	the address of a file which has the ip address of clients for NFS server"
 	  echo "  -ns, --nfs-server	ip address of nfs server"
@@ -132,3 +132,4 @@ if [[ ${role} == "server" ]]; then
 elif [[ ${role} == "client" ]]; then
   start_nfs ${role} ${server_ip} ${nfs_dir}
 fi
+# EOF

@@ -23,7 +23,7 @@
         /gwdg/cloudsuite/datacaching/avgGetSize: {}
       config:
         /gwdg/cloudsuite/datacaching:
-          csv_path: "/var/log/benchmark/detail.csv"
+          csv_path: "/export/detail.csv"
       tags:
         /intel/perf:
           experiment: "experiment 11"
