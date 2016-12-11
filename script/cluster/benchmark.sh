@@ -92,7 +92,7 @@ create_server () {
 #               B E N C H M A R K  C L I E N T  N O D E                 #
 #                                                                       #
 
-reate_client () {
+create_client () {
 
 
 	echo -e "\n[+]  Creating Client\n"
@@ -112,7 +112,8 @@ run_benchmark () {
 
 
 	echo -e "[+] Running Benchmark"
-
+	sudo rm /var/log/benchmark/*
+	echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
 	# Scaling the dataset and warming up the server
 	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log && stdbuf -o0 ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' >> /home/log/benchmark.log'
 
@@ -155,7 +156,7 @@ done
 create_snap_task() {
 
 echo -e "[+] Creating SNAP Task ....."
-snaptel task create -t asset/snap/datacahing-task.yaml > /dev/null && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
+snaptel task create -t asset/snap/datacahing-task.yaml  && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
 
 }
 
@@ -336,9 +337,11 @@ then
 	do
 	    sleep 1;
 	done;
+	echo "Servers are wamred up"
+	sleep 2;
 	create_snap_task
-	sudo pkill tail
-	tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
+	stdbuf -o0 tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
+	snaptel task watch $(snaptel task list | cut -f 1 | tail -n +2 | tail)
 	echo -e "[+] The Benchmark is running in the background\n"
 
 fi

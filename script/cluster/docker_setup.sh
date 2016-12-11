@@ -28,7 +28,7 @@ fi
 
 docker_daemon=$(sudo netstat -tulpn | grep dockerd | wc -l)
 docker_service=$(sudo service docker status | cut -d' ' -f2)
-host_ip=$(ip route get 1 | awk '{print $NF;exit}')
+host_ip=$(sudo /sbin/ifconfig enp0s3| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
 
 service_check (){
 if  test "${docker_service#*"running"}" != ${docker_service}
@@ -131,16 +131,9 @@ echo -e "[+] Preparing Environment"
 if [[ ${role} == "manager" ]]; then
 	sudo bash asset/setup_nfs.sh -r server -c asset/clients.txt
 	mkdir -p /var/log/benchmark
-#  sudo touch /var/log/benchmark/detail.csv
-#  sudo chmod 777 /var/log/benchmark/detail.csv
-#  echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
-#
-#
-#  sudo touch /var/log/benchmark/benchmark.log
-#  sudo chmod 777 /var/log/benchmark/benchmark.log
-#
-  snap_check
-# load_snap_plugin
+        sudo rm /var/log/benchmark/*
+        echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
+	snap_check
 
 fi
 }
