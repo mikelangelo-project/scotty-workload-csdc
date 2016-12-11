@@ -120,60 +120,27 @@ fi
 
 }
 
-
-load_snap_plugin () {
-
-echo -e "[+] Unloading Previous Collector Plugin ....."
-snaptel plugin unload processor passthru 1 > /dev/null && echo -e "---> Passthru Processor Plugin unloaded"
-snaptel plugin unload publisher mock-file 3 > /dev/null && echo -e "---> Passthru Publisher Plugin unloaded"
-snaptel plugin unload collector cloudsuite-dc 1 > /dev/null && echo -e "---> Passthru Collector Plugin unloaded\n"
-
-echo -e "[+] Loading Collector Plugin ....."
-snaptel plugin load asset/snap/snap-plugin-processor-passthru > /dev/null
-echo -e "---> Passthru Processor Plugin Loaded"
-snaptel plugin load asset/snap/snap-plugin-publisher-mock-file > /dev/null
-echo -e "---> Mock-file Publisher Plugin Loaded"
-snaptel plugin load asset/snap/snap-plugin-collector-cloudsuite-datacaching > /dev/null
-echo -e "---> Cloudsuite-datacaching Collector Plugin Loaded\n"
-
-
-echo -e "[+] Removing Previous SNAP Task ....."
-
-snaptel task list | cut -f 1 | tail -n +2 | while read LINE
-do
-  snaptel task stop ${LINE} > /dev/null
-	snaptel task remove ${LINE} > /dev/null
-  echo -e "---> Task ${LINE} removed"
-	done
-echo -e "[+] Creating SNAP Task ....."
-snaptel task create -t asset/snap/datacahing-task.yaml > /dev/null && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
-}
-
-#                                                                       #
-#                    I N S T A L L I N G   S N A P                      #
-#                                                                       #
-
 prepare_env() {
 
 echo -e "[+] Preparing Environment"
 
-if [[ ${role} == "client" ]]; then
-  sudo bash asset/setup_nfs.sh -r client -ns ${nfs_srv} -nd /var/log/benchmark
-fi
+# if [[ ${role} == "client" ]]; then
+#	 sudo bash asset/setup_nfs.sh -r client -ns ${nfs_srv} -nd /var/log/benchmark
+# fi
 
 if [[ ${role} == "manager" ]]; then
-  sudo bash asset/setup_nfs.sh -r server -c asset/clients.txt
-
-  sudo touch /var/log/benchmark/detail.csv
-  sudo chmod 777 /var/log/benchmark/detail.csv
-  echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
-
-
-  sudo touch /var/log/benchmark/benchmark.log
-  sudo chmod 777 /var/log/benchmark/benchmark.log
-
+	sudo bash asset/setup_nfs.sh -r server -c asset/clients.txt
+	mkdir -p /var/log/benchmark
+#  sudo touch /var/log/benchmark/detail.csv
+#  sudo chmod 777 /var/log/benchmark/detail.csv
+#  echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
+#
+#
+#  sudo touch /var/log/benchmark/benchmark.log
+#  sudo chmod 777 /var/log/benchmark/benchmark.log
+#
   snap_check
-  load_snap_plugin
+# load_snap_plugin
 
 fi
 }

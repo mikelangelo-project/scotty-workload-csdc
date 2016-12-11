@@ -52,6 +52,10 @@ network () {
 
 }
 
+#                                                                       #
+#          R E M O V I N G   A L L   C O N T A I N E R S                #
+#                                                                       #
+
 stop_remove_all () {
 
 
@@ -64,6 +68,10 @@ stop_remove_all () {
 	fi
 
 }
+
+#                                                                       #
+#           B E N C H M A R K   S E R V E R S   N O D E S               #
+#                                                                       #
 
 create_server () {
 
@@ -79,15 +87,26 @@ create_server () {
 
 }
 
-create_client () {
+
+#                                                                       #
+#               B E N C H M A R K  C L I E N T  N O D E                 #
+#                                                                       #
+
+reate_client () {
 
 
 	echo -e "\n[+]  Creating Client\n"
 
-	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -v /var/log/benchmark:/home/log --network $network_name cloudsuite/data-caching:client bash
+	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -e constraint:node==$(hostname) -v /var/log/benchmark:/home/log --network $network_name cloudsuite/data-caching:client bash
 		echo -e "[+] Client dc-client is ready\n"
 	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && for i in $(seq 1 1 '"$n"'); do echo -e "dc-server$i, 11211" ; done > docker_servers.txt'
 }
+
+
+#                                                                       #
+#                  R U N N I N G   B E N C H M A R K                    #
+#                                                                       #
+
 
 run_benchmark () {
 
@@ -99,12 +118,58 @@ run_benchmark () {
 
 }
 
+#                                                                       #
+#   C A P T U R E   M E T R I C S   V I A   S N A P   P L U G I N S     #
+#                                                                       #
+
+load_snap_plugin () {
+
+echo -e "[+] Unloading Previous Collector Plugin ....."
+snaptel plugin unload processor passthru 1 > /dev/null && echo -e "---> Passthru Processor Plugin unloaded"
+snaptel plugin unload publisher mock-file 3 > /dev/null && echo -e "---> Passthru Publisher Plugin unloaded"
+snaptel plugin unload collector cloudsuite-dc 1 > /dev/null && echo -e "---> Passthru Collector Plugin unloaded\n"
+
+echo -e "[+] Loading Collector Plugin ....."
+snaptel plugin load asset/snap/snap-plugin-processor-passthru > /dev/null
+echo -e "---> Passthru Processor Plugin Loaded"
+snaptel plugin load asset/snap/snap-plugin-publisher-mock-file > /dev/null
+echo -e "---> Mock-file Publisher Plugin Loaded"
+snaptel plugin load asset/snap/snap-plugin-collector-cloudsuite-datacaching > /dev/null
+echo -e "---> Cloudsuite-datacaching Collector Plugin Loaded\n"
 
 
+echo -e "[+] Removing Previous SNAP Task ....."
 
-#################################
-# check command line parameters #
-#################################
+snaptel task list | cut -f 1 | tail -n +2 | while read LINE
+do
+	snaptel task stop ${LINE} > /dev/null
+	snaptel task remove ${LINE} > /dev/null
+	echo -e "---> Task ${LINE} removed"
+done
+}
+
+#                                                                       #
+#                C R E A T E   S N A P   T A S K                        #
+#                                                                       #
+
+create_snap_task() {
+
+echo -e "[+] Creating SNAP Task ....."
+snaptel task create -t asset/snap/datacahing-task.yaml > /dev/null && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
+
+}
+
+########################################################################
+#                                                                      #
+#                                 M A I N                              #
+#                                                                      #
+########################################################################I
+
+
+#                                                                       #
+#               D I S P L A Y   U S A G E   F U C N T I O N             #
+#                                                                       #
+
 while test $# -gt 0; do
 	case "$1" in
 		-h|--help)
@@ -265,8 +330,13 @@ then
 	stop_remove_all
 	create_server
 	create_client
+	load_snap_plugin
 	run_benchmark
-
+	while [ ! -f /var/log/benchmark/benchmark.log ];
+	do
+	    sleep 1;
+	done;
+	create_snap_task
 	sudo pkill tail
 	tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
 	echo -e "[+] The Benchmark is running in the background\n"
