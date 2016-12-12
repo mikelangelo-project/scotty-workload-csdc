@@ -3,15 +3,13 @@
 [![N|Solid](https://www.gwdg.de/GWDG-Theme-1.0-SNAPSHOT/images/gwdg_logo.svg)](https://nodesource.com/products/nsolid)
 
 ## Overview
-[Cloudsuite] is a benchmark suite for cloud service and this implementation let you run a [Data Caching] benchmar kon multiple server using overlay network on docker swarm.
+[Cloudsuite] is a benchmark suite for cloud service. By using this implementation you can run a [Data Caching] benchmar kon multiple server using overlay network on docker swarm.
 
-## Requirements
+## Prerequisites
   - At least 3 Worker/Host (One Key Value Store Host, One Swarm Manager Host, One Swarm Client Host)
   - All hosts must be access to the internet
 
-This text you see here is *actually* written in Markdown! To get a feel for Markdown's syntax, type some text into the left window and watch the results in the right.
-
-# Benchmark
+## Running The Test
 In order to conduct a benchmark first you need to setup docker and primary setup.
 
 ### Setup Docker Hosts
@@ -34,7 +32,31 @@ To run benchmark enterb below command
 ```sh
 $ ./benchmark -a
 ```
-This command by defaul creates 2 CloudSuite Servers and 1 Cloudsuite Client. The container for CloudSuite Client would be created on client host. The CloudSuite Client generates request for the CloudSuite Servers and store the output to client host every second. Then SNAP collectore reads this output each second and get metrics from that.
+This command by defaul creates 2 CloudSuite Servers and 1 Cloudsuite Client. The container for CloudSuite Client would be created on client host. The CloudSuite Client generates request for the CloudSuite Servers and store the output to client host every second. Then SNAP collector reads the output each second and get metrics from that.
+#### Aditional Options
+If you want to custoimze you benchmark you can use following options.
+```sh
+Usage: ./benchmark.sh [options]
+
+-h  | --help             give this help list.
+
+-a  | --auto             running whole benchmark and setup automatically
+-sa | --stop-all         stop and remove all servers & client
+
+-n  | --server-no        number of server (default: 4)
+-tt | --server-threads   number of threads of server (default: 4)
+-mm | --memory           dedicated memory (default: 4097)
+-nn | --object-size      object size (default: 550)
+-w  | --client-threats   number of client threads (default: 4)
+-T  | --interval         interval between stats printing (default: 1)
+-D  | --server-memory    size of main memory available to each memcached server in MB (default: 4096)
+-S  | --scaling-factor   dataset scaling factor (default: 30)
+-t  | --duration         runtime of loadtesting in seconds (default: run forever)
+-g  | --fraction         fraction of requests that are gets (default: 0.8)
+-c  | --connections      total TCP connections (default: 200)
+```
+## OUTPUT
+You can find the output in manager host in '/var/log/benchmark/detail.csv' directory
 
 ### SNAP Plugins
 
@@ -46,11 +68,29 @@ Currentlt SNAP using following plugin to read metrics
 
 ### SNAP Task
 You can find SNAP task here : [asset/snap/datacahing-task.yaml] [STask]
-
 *Please do not change anything value in task file otherwise the task would be beroken.*
 
+## Troubleshoot
+If you network interface is anything rather than `eth0` please change it in [docker_setyp.sh](docker_setup.sh) line 31
+```sh
+...
+host_ip=$(sudo /sbin/ifconfi eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
+...
+```
+# Built With
 
-### Development
+* [Cloudsuite - Data Caching](http://cloudsuite.ch/datacaching/) - Benchmark suite
+* [Docker](https://www.docker.com/) - Used to run Cloudsuite Containers
+* [SNAP](https://github.com/intelsdi-x/snap) - Used to collect data
+* [GO Language](https://golang.org/) - Used to compile  & run SNAP
+
+## Author
+Name: Mohammad Sahihi Benis
+Email: msahihi@gwdg.de
+
+License
+-------
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 
    [Cloudsuite]: <http://cloudsuite.ch>
@@ -59,4 +99,6 @@ You can find SNAP task here : [asset/snap/datacahing-task.yaml] [STask]
    [SPprocessor]:  <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-processor-passthru>
    [SPpublisher]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-publisher-mock-file>
    [STask]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/datacahing-task.yaml>
+   
+   
    
