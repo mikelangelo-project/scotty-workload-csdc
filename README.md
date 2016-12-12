@@ -71,7 +71,7 @@ You can find SNAP task here : [asset/snap/datacahing-task.yaml] [STask]
 *Please do not change anything value in task file otherwise the task would be beroken.*
 
 ## Troubleshoot
-If you network interface is anything rather than `eth0` please change it in [docker_setyp.sh](docker_setup.sh) line 31
+If you network interface is anything rather than `eth0` please change it in [docker_setup.sh](docker_setup.sh) line 31
 ```sh
 ...
 host_ip=$(sudo /sbin/ifconfi eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
