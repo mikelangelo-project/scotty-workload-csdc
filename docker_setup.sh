@@ -28,7 +28,7 @@ fi
 
 docker_daemon=$(sudo netstat -tulpn | grep dockerd | wc -l)
 docker_service=$(sudo service docker status | cut -d' ' -f2)
-host_ip=$(sudo /sbin/ifconfig enp0s3| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
+host_ip=$(sudo /sbin/ifconfig eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
 
 service_check (){
 if  test "${docker_service#*"running"}" != ${docker_service}
