@@ -56,7 +56,7 @@ Usage: ./benchmark.sh [options]
 -c  | --connections      total TCP connections (default: 200)
 ```
 ## OUTPUT
-You can find the output in manager host in '/var/log/benchmark/detail.csv' directory
+You can find the output in manager host in `/var/log/benchmark/detail.csv` directory
 
 ### SNAP Plugins
 
