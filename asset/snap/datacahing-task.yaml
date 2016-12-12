@@ -24,11 +24,6 @@
       config:
         /gwdg/cloudsuite/datacaching:
           csv_path: "/var/log/benchmark/detail.csv"
-      tags:
-        /intel/perf:
-          experiment: "experiment 11"
-        /intel/perf/bar:
-          os: "linux"
       process:
         -
           plugin_name: "passthru"
