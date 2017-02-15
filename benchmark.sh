@@ -1,45 +1,50 @@
 # name: Cloudsuite benchmark in cluster
-# auth: Mohammad Sahihi <msahihi at gwdg.de>
-# vim: syntax=bash ts=4 sw=4 sts=4 sr noet
+# auth: Mohammad Sahihi <msahihi1 at gwdg.de>
+# vim: ts=4 syntax= bash sw=4 sts=4 sr noet
 
 #!/bin/bash
 #set -x
+#set -e
+
+
+
+#                                                                       #
+#               D I S P L A Y   U S A G E   F U C N T I O N             #
+#                                                                       #
 
 display_usage() {
 cat <<EOF
 Usage: $0 [options]
 
--h  | --help             give this help list.
+	-h  | --help             Give this help list.
 
--a  | --auto             running whole benchmark and setup automatically
--sa | --stop-all         stop and remove all servers & client
+	-a  | --auto             Running whole benchmark and setup automatically
+	-sa | --stop-all         Stop and remove all servers & client
 
--n  | --server-no        number of server (default: 4)
--tt | --server-threads   number of threads of server (default: 4)
--mm | --memory           dedicated memory (default: 4097)
--nn | --object-size      object size (default: 550)
--w  | --client-threats   number of client threads (default: 4)
--T  | --interval         interval between stats printing (default: 1)
--D  | --server-memory    size of main memory available to each memcached server in MB (default: 4096)
--S  | --scaling-factor   dataset scaling factor (default: 30)
--t  | --duration         runtime of loadtesting in seconds (default: run forever)
--g  | --fraction         fraction of requests that are gets (default: 0.8)
--c  | --connections      total TCP connections (default: 200)
+	-n  | --server-no        Number of server (default: 4)
+	-tt | --server-threads   Number of threads of server (default: 4)
+	-mm | --memory           Dedicated memory (default: 4096)
+	-nn | --object-size      Object size (default: 550)
+	-w  | --client-threats   Number of client threads (default: 4)
+	-T  | --interval         Interval between stats printing (default: 1)
+	-D  | --server-memory    Size of main memory available to each memcached server in MB (default: 4096)
+	-S  | --scaling-factor   Dataset scaling factor (default: 30)
+	-t  | --duration         Runtime of loadtesting in seconds (default: run forever)
+	-g  | --fraction         Fraction of requests that are gets (default: 0.8)
+	-c  | --connections      Total TCP connections (default: 200)
 
 EOF
 }
 
-# Initial primary variable
+#                                                                       #
+#          C R E A T E   O V E R L A Y   N E T W O R K                  #
+#                                                                       #
+
+network() {
 network_name="caching_network"
 ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 
-network () {
-
-
-
-	echo -e "[+] Creating Network"
-
-	echo -e "---> Netowrk name : data_chaching"
+	echo -e "---> Netowrk name : $network_name"
 
 	network=$(sudo docker network ls -f NAME=$network_name -q)
 	if [ -z "$network" ];
@@ -56,8 +61,7 @@ network () {
 #          R E M O V I N G   A L L   C O N T A I N E R S                #
 #                                                                       #
 
-stop_remove_all () {
-
+remove_all () {
 
 	if [ -n "$ps" ]
 	then
@@ -66,6 +70,8 @@ stop_remove_all () {
 		echo -e "\n[+] Removing Previous containers"
 		sudo docker -H :4000 rm -f $(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 	fi
+	unload_snap_plugin
+	exit 0
 
 }
 
@@ -78,7 +84,7 @@ create_server () {
 
 	echo -e "\n[+] Creating Servers\n"
 
-	# Reading number of server from input
+	# Reading number of server from argument
 	for i in $(seq 1 1 $n)
 	do
 		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i --network $network_name -d cloudsuite/data-caching:server -t $tt -m $mm -n $nn
@@ -94,12 +100,17 @@ create_server () {
 
 create_client () {
 
+      # By default docker swarm manager join as docker swarm node \
+			# to host cloudsuite datacaching client container.
+
 
 	echo -e "\n[+]  Creating Client\n"
 
 	sudo docker -H :4000 run -itd --name dc-client --hostname dc-client -e constraint:node==$(hostname) -v /var/log/benchmark:/home/log --network $network_name cloudsuite/data-caching:client bash
-		echo -e "[+] Client dc-client is ready\n"
+	echo -e "[+] Client dc-client is ready\n"
 	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && for i in $(seq 1 1 '"$n"'); do echo -e "dc-server$i, 11211" ; done > docker_servers.txt'
+
+
 }
 
 
@@ -111,34 +122,29 @@ create_client () {
 run_benchmark () {
 
 
-	echo -e "[+] Running Benchmark"
+	echo -e "[+] Warming up the servers. "
+	sleep 2
+	echo -e "[!] It may takes few minutes."
 	# Scaling the dataset and warming up the server
-	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ && ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log && stdbuf -o0 ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w'"$w"' -t '"$t"' >> /home/log/benchmark.log'
+	sudo docker -H :4000 exec -d dc-client bash -c 'cd /usr/src/memcached/memcached_client/ &&  stdbuf -o0 ./loader -a ../twitter_dataset/twitter_dataset_unscaled -o ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -w '"$w"' -S '"$S"' -D '"$D"' -j -T '"$T"' >> /home/log/warmup.log && stdbuf -o0 ./loader -a ../twitter_dataset/twitter_dataset_30x -s docker_servers.txt -g '"$g"' -T '"$T"' -c '"$c"' -w '"$w"' -t '"$t"' >> /home/log/benchmark.log'
 
 }
 
 #                                                                       #
-#   C A P T U R E   M E T R I C S   V I A   S N A P   P L U G I N S     #
+#               U N L O A D   S N A P   P L U G I N                     #
 #                                                                       #
 
-load_snap_plugin () {
+unload_snap_plugin () {
 
 echo -e "[+] Unloading Previous Collector Plugin ....."
-snaptel plugin unload processor passthru 1 > /dev/null && echo -e "---> Passthru Processor Plugin unloaded"
-snaptel plugin unload publisher mock-file 3 > /dev/null && echo -e "---> Passthru Publisher Plugin unloaded"
-snaptel plugin unload collector cloudsuite-dc 1 > /dev/null && echo -e "---> Passthru Collector Plugin unloaded\n"
-
-echo -e "[+] Loading Collector Plugin ....."
-snaptel plugin load asset/snap/snap-plugin-processor-passthru > /dev/null
-echo -e "---> Passthru Processor Plugin Loaded"
-snaptel plugin load asset/snap/snap-plugin-publisher-mock-file > /dev/null
-echo -e "---> Mock-file Publisher Plugin Loaded"
-snaptel plugin load asset/snap/snap-plugin-collector-cloudsuite-datacaching > /dev/null
-echo -e "---> Cloudsuite-datacaching Collector Plugin Loaded\n"
-
+snaptel plugin unload processor tag 3 > /dev/null
+echo -e "[X] Tag Processor Plugin unloaded"
+snaptel plugin unload publisher influxdb 17 > /dev/null
+echo -e "[X] Influxdb Publisher Plugin unloaded"
+snaptel plugin unload collector cloudsuite-dc 1 > /dev/null
+echo -e "[X] Cloudsuite-datacaching Collector Plugin unloaded\n"
 
 echo -e "[+] Removing Previous SNAP Task ....."
-
 snaptel task list | cut -f 1 | tail -n +2 | while read LINE
 do
 	snaptel task stop ${LINE} > /dev/null
@@ -148,13 +154,29 @@ done
 }
 
 #                                                                       #
+#   C A P T U R E   M E T R I C S   V I A   S N A P   P L U G I N S     #
+#                                                                       #
+
+load_snap_plugin(){
+
+echo -e "[+] Loading Collector Plugin ....."
+snaptel plugin load $PWD/asset/snap/snap-plugin-processor-tag > /dev/null
+echo -e "[*] Tag Processor Plugin Loaded"
+snaptel plugin load $PWD/asset/snap/snap-plugin-publisher-influxdb > /dev/null
+echo -e "[*] Influxdb Publisher Plugin Loaded"
+snaptel plugin load $PWD/asset/snap/snap-plugin-collector-cloudsuite-datacaching > /dev/null
+echo -e "[*] Cloudsuite-datacaching Collector Plugin Loaded\n"
+
+}
+
+#                                                                       #
 #                C R E A T E   S N A P   T A S K                        #
 #                                                                       #
 
 create_snap_task() {
 
 echo -e "[+] Creating SNAP Task ....."
-snaptel task create -t asset/snap/datacahing-task.yaml  && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
+snaptel task create -t asset/snap/datacaching-task.yaml  && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
 
 }
 
@@ -164,13 +186,10 @@ snaptel task create -t asset/snap/datacahing-task.yaml  && echo -e "[+] Cloudsui
 #                                                                      #
 ########################################################################I
 
-
-#                                                                       #
-#               D I S P L A Y   U S A G E   F U C N T I O N             #
-#                                                                       #
-
-while test $# -gt 0; do
-	case "$1" in
+while [[ $# -gt 0 ]]
+do
+key="$1"
+	case $key in
 		-h|--help)
 		display_usage
 		exit 0
@@ -179,8 +198,8 @@ while test $# -gt 0; do
 		auto=1
 		shift
 		;;
-		-sa|--stop-all)
-		stop_remove_all
+		-R|--remove-all)
+		remove_all
 		shift
 		;;
 		-n|--server-no)
@@ -247,12 +266,12 @@ done
 
 if [ "$n" = "" ]
 then
-    n=2
+    n=4
 fi
 
 if [ "$tt" = "" ]
 then
-    tt=2
+    tt=4
 fi
 
 if [ "$mm" = "" ]
@@ -267,7 +286,7 @@ fi
 
 if [ "$w" = "" ]
 then
-    w=2
+    w=4
 fi
 
 if [ "$T" = "" ]
@@ -302,31 +321,32 @@ fi
 
 if [ "$auto" = 1 ]
 then
-	echo -e "#########################################"
+	echo -e "+---------------------------------------+"
 	echo -e "                                         "
-	echo -e "         Benchmark Environment           "
+	echo -e "           Benchmark Environment         "
 	echo -e "                                         "
-	echo -e "       -------- Server -------           "
+	echo -e "      ---------- Server ---------        "
 	echo -e "                                         "
-	echo -e "     Number of Server: $n                "
-	echo -e "     Server Threads:   $tt               "
-	echo -e "     Dedicated memory: $mm               "
-	echo -e "     Object Size:      $nn               "
+	echo -e "        Number of Server: $n             "
+	echo -e "        Server Threads:   $tt            "
+	echo -e "        Dedicated memory: $mm            "
+	echo -e "        Object Size:      $nn            "
 	echo -e "                                         "
-	echo -e "       --------- Client ------           "
+	echo -e "       --------- Client ---------        "
 	echo -e "                                         "
-	echo -e "     Client threats:   $w                "
-	echo -e "     Interval:         $T                "
-	echo -e "     Server memory:    $D                "
-	echo -e "     Scaling factor:   $S                "
-	echo -e "     Fraction:         $g                "
-	echo -e "     Connections:      $c                "
-	echo -e "     Duration:         $t                "
+	echo -e "        Client threats:   $w             "
+	echo -e "        Interval:         $T             "
+	echo -e "        Server memory:    $D             "
+	echo -e "        Scaling factor:   $S             "
+	echo -e "        Fraction:         $g             "
+	echo -e "        Connections:      $c             "
+	echo -e "        Duration:         $t             "
 	echo -e "                                         "
-	echo -e "#########################################"
+	echo -e "+---------------------------------------+"
 
 	network
-	stop_remove_all
+	sudo rm -rd /var/log/benchmark/*
+	remove_all
 	create_server
 	create_client
 	load_snap_plugin
@@ -335,11 +355,13 @@ then
 	do
 	    sleep 1;
 	done;
-	echo "Servers are wamred up"
+	echo -e "[+] Servers are wamred up"
+  echo -e "[+] Running Benchmark ...\n"
 	sleep 2;
-	create_snap_task
 	stdbuf -o0 tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
-	snaptel task watch $(snaptel task list | cut -f 1 | tail -n +2 | tail)
+	create_snap_task
+	stdbuf -o0 snaptel task watch $(stdbuf -o0 snaptel task list | cut -f 1 | tail -n +2 | tail)
 	echo -e "[+] The Benchmark is running in the background\n"
+
 
 fi
