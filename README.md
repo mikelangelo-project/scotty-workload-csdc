@@ -1,4 +1,4 @@
-# CloudSuite Data Caching Benchmark Using Docker Swarm 
+# CloudSuite Data Caching Benchmark Using Docker Swarm
 
 [![N|Solid](https://www.gwdg.de/GWDG-Theme-1.0-SNAPSHOT/images/gwdg_logo.svg)](https://nodesource.com/products/nsolid)
 
@@ -56,7 +56,7 @@ Usage: ./benchmark.sh [options]
 -c  | --connections      total TCP connections (default: 200)
 ```
 ## OUTPUT
-You can find the output in manager host in `/var/log/benchmark/detail.csv` directory
+You can find the output in manager host in '/var/log/benchmark/detail.csv' directory
 
 ### SNAP Plugins
 
@@ -70,8 +70,23 @@ Currentlt SNAP using following plugin to read metrics
 You can find SNAP task here : [asset/snap/datacahing-task.yaml] [STask]
 *Please do not change anything value in task file otherwise the task would be beroken.*
 
+## Running benchmark using Openstack heat template
+You can run the whole of the benchmark, from creating docker setup to running the benchamrk, by using heat template.
+The template call by a Python script [run.py] [run]
+##### Python script requirement
+
+* access to Openstack heat API
+* python Fabric library
+* source openrc file from openstack
+
+Inorder tor run bencharmk on openstack you just need to run
+```sh
+python run.py
+```
+*The script is under development.*
+
 ## Troubleshoot
-If you network interface is anything rather than `eth0` please change it in [docker_setup.sh](docker_setup.sh) line 31
+If you network interface is anything rather than `eth0` please change it in [docker_setyp.sh](docker_setup.sh) line 31
 ```sh
 ...
 host_ip=$(sudo /sbin/ifconfi eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
@@ -99,6 +114,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
    [SPprocessor]:  <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-processor-passthru>
    [SPpublisher]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-publisher-mock-file>
    [STask]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/datacahing-task.yaml>
-   
-   
-   
+   [run]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/heat_template/run.py>
