@@ -1,7 +1,3 @@
-# name: Docker setup
-# auth: Mohammad Sahihi <msahihi at gwdg.de>
-# vim: syntax=bash ts=4 sw=4 sts=4 sr noet
-
 #!/bin/bash
 #set -x
 #set -e
@@ -17,6 +13,7 @@ if which docker >/dev/null; then
 else
   echo -e "[+] Installing Docker ....."
   curl -sSL https://get.docker.com/ | sh
+  sudo usermod -aG docker $(whoami)
   sudo service docker stop
 fi
 
@@ -60,7 +57,7 @@ docker_config () {
 
 echo -e "[+] Setting up ${role}"
 if [[ ${role} == "keystore" ]]; then
-  sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock &
+  sudo dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock &
   sleep 2
   sudo docker stop consul
   sudo docker rm -f consul
@@ -69,7 +66,7 @@ if [[ ${role} == "keystore" ]]; then
 fi
 
 if [[ ${role} != "keystore" ]]; then
-sudo docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://${keyValue}:8500  --cluster-advertise=${host_ip}:2376 &
+sudo dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://${keyValue}:8500  --cluster-advertise=${host_ip}:2376 &
 sleep 5
 fi
 
@@ -89,10 +86,10 @@ if [[ ${role} == "manager" ]]; then
   sudo docker run -d --name swarm_${role} -p 4000:4000 swarm manage -H :4000 --replication --advertise ${host_ip}:4000 consul://${keyValue}:8500 > /dev/null &&
 echo -e "[+] Swarm manager is ready"
 fi
-
+## if you want that manager take role as a member in cluster make roll to !=keystore
 if [[ ${role} != "keystore" ]]; then
 sudo docker run -d --name swarm_${role}_node swarm join --advertise=${host_ip}:2375 consul://${keyValue}:8500 > /dev/null &&
-echo -e "[+] Swarm manager joined as node"
+echo -e "[+] $HOST joined as node"
 fi
 }
 
@@ -106,9 +103,10 @@ if which snaptel >/dev/null; then
   echo -e "[+] SNAP is already installed"
 else
   echo -e "[+] Installing GO ....."
-
-  sudo chmod 700 asset/goinstall.sh
-  bash asset/goinstall.sh --64
+  echo $PWD
+  echo $PWD | ls
+  sudo chmod 700 $PWD/asset/goinstall.sh
+  bash $PWD/asset/goinstall.sh --64
   echo -e "[+] GO installed ....."
 
   echo -e "[+] Installing SNAP ....."
@@ -129,10 +127,10 @@ echo -e "[+] Preparing Environment"
 # fi
 
 if [[ ${role} == "manager" ]]; then
-	sudo bash asset/setup_nfs.sh -r server -c asset/clients.txt
+#	sudo bash asset/setup_nfs.sh -r server -c asset/clients.txt
 	mkdir -p /var/log/benchmark
-        sudo rm /var/log/benchmark/*
-        echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
+  sudo chmod 777 /var/log/benchmark/
+  echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
 	snap_check
 
 fi
@@ -194,6 +192,8 @@ done
 docker_install
 service_check
 docker_config ${role} ${keyValue}
-prepare_env ${nfs_srv}
+#prepare_env ${nfs_srv}
+prepare_env
+echo "Setup Completed Successfully."
 
 # EOF
