@@ -1,24 +1,67 @@
 import re
 import sys
+import logging
 import argparse
 import subprocess
 from fabric.api import *
 
-def heat( bechmark_name ):
-    output =subprocess.check_output("heat stack-create -f swarm.yaml  "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
-    print output
-    print "\n[!] Creating stack takes few mintues"
-    while True:
-        output =subprocess.check_output("heat stack-show "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
-        match = re.search(r'(?<=stack_status).*', output)
-        result=match.group()
-        if "COMPLETE" in result:
-            print "[+] Stack CREATE completed successfully "
-            break
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='/tmp/myapp.log',
+                    filemode='w')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+formatter = logging.Formatter('%(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
-        if "FAILED" in result:
-            print "[X] Stack CREATE FAILED\n[X]Check stack logs"
-            sys.exit(0)
+def heat( bechmark_name, action ):
+    output=""
+    if action=="create":
+        try:
+            output =subprocess.check_output("heat stack-create -f docker-swarm.yaml  "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
+            logging.info(output)
+            logging.info("\n[!] Creating stack takes few mintues")
+            while True:
+                output =subprocess.check_output("heat stack-show "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
+                match = re.search(r'(?<=stack_status).*', output)
+                result=match.group()
+                if "COMPLETE" in result:
+                    logging.info("[+] Stack CREATE completed successfully ")
+                    break
+
+                if "FAILED" in result:
+                    logging.error("[X] Stack CREATE FAILED\n[X]Check stack logs")
+                    sys.exit(0)
+        except subprocess.CalledProcessError as e:
+            logging.error(e.output)
+            sys.exit()
+
+
+
+    if action== "delete":
+        try:
+            output =subprocess.check_output("heat stack-delete -y "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
+            logging.info(output)
+            logging.info("\n[!] Deleting ...")
+            while True:
+                output =subprocess.check_output("heat stack-show "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
+                match = re.search(r'(?<=stack_status).*', output)
+                result=match.group()
+                if "COMPLETE" in result:
+                    logging.info("[+] Stack DELETE completed successfully ")
+                    break
+
+                if "FAILED" in result:
+                    logging.error("[X] Stack CREATE FAILED\n[X]Check stack logs")
+                    sys.exit(0)
+        except subprocess.CalledProcessError as e:
+            logging.error(e.output)
+            sys.exit()
+
+
 
 
 def get_manager_ip(bechmark_name):
@@ -30,12 +73,23 @@ def deploy(remote_server):
     with settings(host_string=remote_server, user = "ubuntu"):
         run ('cd /usr/src/cs-benchmark && ./benchmark.sh -a')
 
+def run_benchmark():
+    heat(args.name,"create")
+    get_manager_ip(args.name)
+    print "#"
+    logging.info("# Swarm Manager IP address is : "+get_manager_ip.ip)
+    print "#"
+    deploy(get_manager_ip.ip)
+
+def remove_benchmark():
+    heat(args.name,"delete")
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-N', '--name',help='Benchmark name. default: cs-datacaching', default='cs-datacaching')
 
-    parser.add_argument('-a', '--auto',help='running whole benchmark and setup automatically', default='cs-datacaching')
-    parser.add_argument('-R', '--remove_all',help='stop and remove all servers & client', default='cs-datacaching')
+    parser.add_argument('-a', '--auto',help='running whole benchmark and setup automatically', action='store_true' )
+    parser.add_argument('-R', '--remove_all',help='stop and remove all servers & client', action='store_true' )
 
     parser.add_argument('-n', '--server-no',help='number of server (default: 4)', default=4)
     parser.add_argument('-tt', '--server-threads',help='number of threads of server (default: 4)', default=4)
@@ -51,9 +105,12 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    heat(args.name)
-    get_manager_ip(args.name)
-    print "#"
-    print "# Swarm Manager IP address is : "+get_manager_ip.ip
-    print "#"
-    deploy(get_manager_ip.ip)
+    if args.auto & args.remove_all :
+        print "-a (--auto) and -R (--remove_all) can not be used at the same time"
+        exit
+    elif args.auto:
+        run_benchmark()
+    elif args.remove_all:
+        remove_benchmark()
+    else:
+        parser.print_help()
