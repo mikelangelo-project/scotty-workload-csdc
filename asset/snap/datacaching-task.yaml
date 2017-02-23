@@ -37,7 +37,7 @@
              port: 8086
              database: "workload"
              retention: "default"
-             user: ""
-             password: ""
+             user: "msahihi"
+             password: "p4msahihi"
              https: true
              skip-verify: false
