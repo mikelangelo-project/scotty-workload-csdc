@@ -94,7 +94,7 @@ host_ip=$(sudo /sbin/ifconfi eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print
 ```
 # Built With
 
-* [Openstack](https://www.openstack.org/) - Used for Heat template 
+* [Openstack](https://www.openstack.org/) - Used for Heat template
 * [Cloudsuite - Data Caching](http://cloudsuite.ch/datacaching/) - Benchmark suite
 * [Docker](https://www.docker.com/) - Used to run Cloudsuite Containers
 * [SNAP](https://github.com/intelsdi-x/snap) - Used to collect data
@@ -114,5 +114,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
    [SPcollector]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-collector-cloudsuite-datacaching>
    [SPprocessor]:  <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-processor-passthru>
    [SPpublisher]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-publisher-mock-file>
-   [STask]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/datacahing-task.yaml>
+   [STask]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/datacaching-task.yaml>
    [run]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/heat_template/run.py>
