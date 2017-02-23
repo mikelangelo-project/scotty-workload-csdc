@@ -257,7 +257,6 @@ resources:
      key_name: { get_param: key_name }
      networks:
        - network: {get_resource: internal_net}
-#      - port: { get_resource: client_port }
      user_data_format: RAW
      user_data: { get_resource: client_node_init  }
 
@@ -283,37 +282,5 @@ resources:
 
 outputs:
 
- # KeyValue_name:
- #  description: Name of the instance
- #  value: { get_attr: [KeyValue, name] }
-
-# KeyValue_Public_ip:
-#  description: Public IP address of the instance
-#  value: { get_attr: [keyvalue_floating_ip, floating_ip_address] }
-
- # KeyValue_Private_ip:
- #  description: Private IP address of the instance
- #  value: { get_attr: [KeyValue, first_address] }
-
-##############
-
- # Manager_name:
- #  description: Name of the instance
- #  value: { get_attr: [Manager, name] }
-
  Manager_Public_ip:
   value: { get_attr: [manager_floating_ip, floating_ip_address] }
-
- # Manager_Private_ip:
- #  description: Private IP address of the instance
- #  value: { get_attr: [Manager, first_address] }
-
-###############
-
- # Clients_name:
- #  description: Name of the instance
- #  value: { get_attr: [Clients, name] }
- #
- # Clients_Private_ip:
- #  description: Private IP address of the instance
- #  value: { get_attr: [Clients, first_address] }
