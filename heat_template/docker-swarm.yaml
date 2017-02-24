@@ -17,7 +17,7 @@ parameters:
 
  private_network_dns_server:
   type: string
-  description: test
+  description: Private network dns
   default: ["8.8.8.8", "4.2.2.4"]
 
 # INSTANCES
