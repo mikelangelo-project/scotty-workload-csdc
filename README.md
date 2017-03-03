@@ -3,7 +3,7 @@
 [![N|Solid](https://www.gwdg.de/GWDG-Theme-1.0-SNAPSHOT/images/gwdg_logo.svg)](https://nodesource.com/products/nsolid)
 
 ## Overview
-[Cloudsuite] is a benchmark suite for cloud service. By using this implementation you can run a [Data Caching] benchmar kon multiple server using overlay network on docker swarm.
+[Cloudsuite] is a benchmark suite for cloud service. By using this implementation you can run a [Data Caching] benchmark on multiple server using overlay network on docker swarm.
 
 ## Prerequisites
   - At least 3 Worker/Host (One Key Value Store Host, One Swarm Manager Host, One Swarm Client Host)
@@ -102,7 +102,7 @@ host_ip=$(sudo /sbin/ifconfi eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print
 
 ## Author
 Name: Mohammad Sahihi Benis
-Email: msahihi@gwdg.de
+Email: mohammad.sahihi-benis@gwdg.de
 
 License
 -------
