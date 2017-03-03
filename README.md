@@ -34,7 +34,7 @@ $ ./benchmark -a
 ```
 This command by defaul creates 2 CloudSuite Servers and 1 Cloudsuite Client. The container for CloudSuite Client would be created on client host. The CloudSuite Client generates request for the CloudSuite Servers and store the output to client host every second. Then SNAP collector reads the output each second and get metrics from that.
 #### Aditional Options
-If you want to custoimze you benchmark you can use following options.
+If you want to custoimze your benchmark you can use following options.
 ```sh
 Usage: ./benchmark.sh [options]
 
@@ -56,15 +56,15 @@ Usage: ./benchmark.sh [options]
 -c  | --connections      total TCP connections (default: 200)
 ```
 ## OUTPUT
-You can find the output in manager host in '/var/log/benchmark/detail.csv' directory
+You can find the output file in manager host in '/var/log/benchmark/detail.csv' directory
 
 ### SNAP Plugins
 
-Currentlt SNAP using following plugin to read metrics
+Currently, SNAP using following plugin to read metrics
 
 * [asset/snap/snap-plugin-collector-cloudsuite-datacaching] [SPcollector]
-* [asset/snap/snap-plugin-processor-passthru] [SPprocessor]
-* [asset/snap/snap-plugin-publisher-mock-file] [SPpublisher]
+* [asset/snap/snap-plugin-processor-tag] [SPprocessor]
+* [asset/snap/snap-plugin-publisher-influxdb] [SPpublisher]
 
 ### SNAP Task
 You can find SNAP task here : [asset/snap/datacahing-task.yaml] [STask]
@@ -72,7 +72,7 @@ You can find SNAP task here : [asset/snap/datacahing-task.yaml] [STask]
 
 ## Running benchmark using Openstack heat template
 You can run the whole of the benchmark, from creating docker setup to running the benchamrk, by using heat template.
-The template call by a Python script [run.py] [run]
+The template called by a Python script [run.py] [run]
 ##### Python script requirement
 
 * access to Openstack heat API
@@ -86,7 +86,7 @@ python run.py
 *The script is under development.*
 
 ## Troubleshoot
-If you network interface is anything rather than `eth0` please change it in [docker_setyp.sh](docker_setup.sh) line 31
+If your network interface is anything rather than `eth0` please change it in [docker_setyp.sh](docker_setup.sh) line 28
 ```sh
 ...
 host_ip=$(sudo /sbin/ifconfi eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
@@ -112,7 +112,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
    [Cloudsuite]: <http://cloudsuite.ch>
    [Data Caching]: <https://github.com/ParsaLab/cloudsuite/tree/master/benchmarks/data-caching>
    [SPcollector]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-collector-cloudsuite-datacaching>
-   [SPprocessor]:  <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-processor-passthru>
-   [SPpublisher]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-publisher-mock-file>
+   [SPprocessor]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-processor-tag>
+   [SPpublisher]:<https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-publisher-influxdb>
    [STask]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/datacaching-task.yaml>
    [run]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/heat_template/run.py>
