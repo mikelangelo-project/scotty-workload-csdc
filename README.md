@@ -28,7 +28,7 @@ $ ./docker_setup.sh -r client -k <IP ADDRESS OF KEY VALUE STORE>
 Now every host is running docker and all of them connected to eachother using docker swarm
 
 ### Running Benchmark
-To run benchmark enterb below command
+To run benchmark enter below command
 ```sh
 $ ./benchmark -a
 ```
