@@ -45,7 +45,7 @@ parameters:
 
  image_id:
   type: string
-  description: image which would used for nodes
+  description: image which would use for nodes
   default: e9cf0016-07c1-43e6-ac8a-8a034f0e7755
 
  private_subnet_id:
@@ -58,7 +58,12 @@ parameters:
   description: number of client node which would join to the cluster
   default: 2
 
-## R E S O U R C E S
+                   #                                            #
+                   #                                            #
+                   #           R E S O U R C E S                #
+                   #                                            #
+                   #                                            #
+
 resources:
 
  internal_net:

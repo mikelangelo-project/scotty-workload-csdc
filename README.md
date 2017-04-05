@@ -1,15 +1,45 @@
-# CloudSuite Data Caching Benchmark Using Docker Swarm
+Automation and Integration of a CloudSute Datacahing Benchmark into Openstack Cloud
+===================
 
 [![N|Solid](https://www.gwdg.de/GWDG-Theme-1.0-SNAPSHOT/images/gwdg_logo.svg)](https://nodesource.com/products/nsolid)
 
 ## Overview
-[Cloudsuite] is a benchmark suite for cloud service. By using this implementation you can run a [Data Caching] benchmark on multiple server using overlay network on docker swarm.
+[Cloudsuite] is a benchmark suite for cloud service. This implementation aims to run a [Data Caching] benchmark on multiple server using overlay network on docker swarm over Openstack Cloud. It is possible to run the benchmark either On Opnestack cloud or Virtual machine. The difference between these two is that, in Openstack everything would be run automatically, from creating virtual machines to running the benchmark, however in virtual machine mode, you need to create machines by your self and then run scripts manually on each of virtual machines.
 
-## Prerequisites
+# 1) Running On Openstack using heat template
+### Prerequisites
+  - Openstack cloud with access to create 3 virtual machines, create network, 1 floating ip
+  - Minimum of 14 GB  memory
+  - Minimum of 3 VCPU
+  - access to Openstack heat API
+  - python Fabric library
+  - source openrc file from openstack
+
+### Configuration
+Script will creates virtual machines using OpenStack Heat API from [heat_template/docker-swarm.yaml][Heat Config].
+You need to just change default values of  "keyvalue_flavor", "manager_flavor","client_flavor","image_id" .
+
+### Running The Test
+Inorder tor run bencharmk on openstack you just need to run
+```sh
+python run.py -a
+```
+more option on
+```sh
+python run.py -h
+```
+
+# 2) Running The Virtual machine
+
+### Prerequisites
   - At least 3 Worker/Host (One Key Value Store Host, One Swarm Manager Host, One Swarm Client Host)
+    - Keyvalue store (A node running Ubuntu 16.04 with 2GB memory)
+    - Manager Host (A node running Ubuntu 16.04 with 4GB memory)
+    - Client Host (A node running Ubuntu 16.04 with 8GB memory)
   - All hosts must be access to the internet
 
-## Running The Test
+_**it is possbile to run clinet with lower memory but you have to configure your test propery to avoid craching during the test.**_
+### Running The Test
 In order to conduct a benchmark first you need to setup docker and primary setup.
 
 ### Setup Docker Hosts
@@ -70,23 +100,8 @@ Currently, SNAP using following plugin to read metrics
 You can find SNAP task here : [asset/snap/datacahing-task.yaml] [STask]
 *Please do not change anything value in task file otherwise the task would be beroken.*
 
-## Running benchmark using Openstack heat template
-You can run the whole of the benchmark, from creating docker setup to running the benchamrk, by using heat template.
-The template called by a Python script [run.py] [run]
-##### Python script requirement
-
-* access to Openstack heat API
-* python Fabric library
-* source openrc file from openstack
-
-Inorder tor run bencharmk on openstack you just need to run
-```sh
-python run.py
-```
-*The script is under development.*
-
 ## Troubleshoot
-If your network interface is anything rather than `eth0` please change it in [docker_setyp.sh](docker_setup.sh) line 28
+If your network interface is anything rather than `eth0` please change it in [docker_setup.sh](docker_setup.sh) line 28
 ```sh
 ...
 host_ip=$(sudo /sbin/ifconfi eth0| grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
@@ -116,3 +131,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
    [SPpublisher]:<https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/snap-plugin-publisher-influxdb>
    [STask]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/asset/snap/datacaching-task.yaml>
    [run]: <https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/blob/master/heat_template/run.py>
+   [Heat Config]: https://gitlab.gwdg.de/mikelangelo/cs-dataCaching/raw/master/heat_template/docker-swarm.yaml
