@@ -14,11 +14,26 @@ Automation and Integration of The CloudSuite Datacaching Benchmark into OpenStac
   - access to Openstack heat API
   - python Fabric library
   - source openrc file from openstack
+  - An installed Influxdb
 
 ### Configuration
-Script will creates virtual machines using OpenStack Heat API from [heat_template/docker-swarm.yaml][Heat Config].
-You need to just change default values of  "keyvalue_flavor", "manager_flavor","client_flavor","image_id" .
-
+- Script will creates virtual machines using OpenStack Heat API from [heat_template/docker-swarm.yaml][Heat Config].
+You need to change default values of  "keyvalue_flavor", "manager_flavor","client_flavor","image_id" .
+- Since we store log's data into influxdb database, you need to edit your credential (user & password) for db to let the SNAP collector to store data. To do so open [asset/snap/datacahing-task.yaml] [STask] and change all related value for influxdb 's plugin.
+```
+      publish:
+        -
+          plugin_name: "influxdb"     #do not change this
+          config:
+             host: "IP ADDRESS OF INFLUXDB"
+             port: 8086
+             database: "DATABASE NAME"
+             retention: "default"
+             user: "YOUR USERNAME"
+             password: "YOUR PASSWORD
+             https: true
+             skip-verify: false
+```
 ### Running The Test
 In order tor run bencharmk on openstack first you need to source your openrc file from openstack and then run
 ```sh
