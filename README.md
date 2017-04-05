@@ -1,10 +1,10 @@
-Automation and Integration of a CloudSute Datacahing Benchmark into Openstack Cloud
+Automation and Integration of The CloudSuite Datacaching Benchmark into OpenStack Cloud
 ===================
 
 [![N|Solid](https://www.gwdg.de/GWDG-Theme-1.0-SNAPSHOT/images/gwdg_logo.svg)](https://nodesource.com/products/nsolid)
 
 ## Overview
-[Cloudsuite] is a benchmark suite for cloud service. This implementation aims to run a [Data Caching] benchmark on multiple server using overlay network on docker swarm over Openstack Cloud. It is possible to run the benchmark either On Opnestack cloud or Virtual machine. The difference between these two is that, in Openstack everything would be run automatically, from creating virtual machines to running the benchmark, however in virtual machine mode, you need to create machines by your self and then run scripts manually on each of virtual machines.
+[Cloudsuite] is a benchmark suite for cloud service. This implementation aims to run a [Data Caching] benchmark on multiple server using overlay network on docker swarm over Openstack Cloud. It is possible to run the benchmark either On OpneStack cloud or Virtual machine. The difference between these two is that, in OpneStack everything would be run automatically, from creating virtual machines to running the benchmark, however in virtual machine mode, you need to create machines by your self and then run scripts manually on each of virtual machines.
 
 # 1) Running On Openstack using heat template
 ### Prerequisites
@@ -20,7 +20,7 @@ Script will creates virtual machines using OpenStack Heat API from [heat_templat
 You need to just change default values of  "keyvalue_flavor", "manager_flavor","client_flavor","image_id" .
 
 ### Running The Test
-Inorder tor run bencharmk on openstack you just need to run
+In order tor run bencharmk on openstack first you need to source your openrc file from openstack and then run
 ```sh
 python run.py -a
 ```
