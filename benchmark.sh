@@ -19,7 +19,7 @@ Usage: $0 [options]
 	-h  | --help             Give this help list.
 
 	-a  | --auto             Running whole benchmark and setup automatically
-	-sa | --stop-all         Stop and remove all servers & client
+	-R  | --remove-all         Stop and remove all servers & client
 
 	-n  | --server-no        Number of server (default: 4)
 	-tt | --server-threads   Number of threads of server (default: 4)
@@ -39,10 +39,9 @@ EOF
 #                                                                       #
 #          C R E A T E   O V E R L A Y   N E T W O R K                  #
 #                                                                       #
-
+ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 network() {
 network_name="caching_network"
-ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 
 	echo -e "---> Netowrk name : $network_name"
 
@@ -71,7 +70,6 @@ remove_all () {
 		sudo docker -H :4000 rm -f $(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 	fi
 	unload_snap_plugin
-	exit 0
 
 }
 
@@ -87,7 +85,7 @@ create_server () {
 	# Reading number of server from argument
 	for i in $(seq 1 1 $n)
 	do
-		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i --network $network_name -d cloudsuite/data-caching:server -t $tt -m $mm -n $nn
+		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i -e constraint:node!=$(hostname) --network $network_name -d cloudsuite/data-caching:server -t $tt -m $mm -n $nn
 		echo -e "[+] Server $i is ready"
 	done
 
@@ -239,7 +237,7 @@ key="$1"
 		shift 2
 		;;
 		-g|--fraction)
-		=$2
+		g=$2
 		shift 2
 		;;
 		-c|--connections)
@@ -345,7 +343,7 @@ then
 	echo -e "+---------------------------------------+"
 
 	network
-	sudo rm -rd /var/log/benchmark/*
+	sudo rm -rf /var/log/benchmark/*
 	remove_all
 	create_server
 	create_client
@@ -357,11 +355,10 @@ then
 	done;
 	echo -e "[+] Servers are wamred up"
   echo -e "[+] Running Benchmark ...\n"
-	sleep 2;
+	echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" >> /var/log/benchmark/detail.csv
 	stdbuf -o0 tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
+	sleep 10; # to be sure that we get the output in detail.csv
 	create_snap_task
-	stdbuf -o0 snaptel task watch $(stdbuf -o0 snaptel task list | cut -f 1 | tail -n +2 | tail)
+	stdbuf -o0 snaptel task watch $(snaptel task list | cut -f 1 | tail -n +2 | tail)
 	echo -e "[+] The Benchmark is running in the background\n"
-
-
 fi

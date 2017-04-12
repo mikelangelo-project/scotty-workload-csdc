@@ -8,7 +8,7 @@ Automation and Integration of The CloudSuite Datacaching Benchmark into OpenStac
 
 # 1) Running On Openstack using heat template
 ### Prerequisites
-  - Openstack cloud with access to create 3 virtual machines, create network, 1 floating ip
+  - Openstack cloud with access to create 3 virtual machines, create network, 1 floating IP
   - Minimum of 14 GB  memory
   - Minimum of 3 VCPU
   - access to Openstack heat API
@@ -17,25 +17,25 @@ Automation and Integration of The CloudSuite Datacaching Benchmark into OpenStac
   - An installed Influxdb
 
 ### Configuration
-- Script will creates virtual machines using OpenStack Heat API from [heat_template/docker-swarm.yaml][Heat Config].
-You need to change default values of  "keyvalue_flavor", "manager_flavor","client_flavor","image_id" .
-- Since we store log's data into influxdb database, you need to edit your credential (user & password) for db to let the SNAP collector to store data. To do so open [asset/snap/datacahing-task.yaml] [STask] and change all related value for influxdb 's plugin.
-```
-      publish:
-        -
-          plugin_name: "influxdb"     #do not change this
-          config:
-             host: "IP ADDRESS OF INFLUXDB"
-             port: 8086
-             database: "DATABASE NAME"
-             retention: "default"
-             user: "YOUR USERNAME"
-             password: "YOUR PASSWORD
-             https: true
-             skip-verify: false
-```
+  - Script will creates virtual machines using OpenStack Heat API from [heat_template/docker-swarm.yaml][Heat Config].
+  You need to change default values of  "keyvalue_flavor", "manager_flavor","client_flavor","image_id" .
+  - Since we store log's data into influxdb database, you need to edit your credential (user & password) for db to let the SNAP collector to store data. To do so open [asset/snap/datacahing-task.yaml] [STask] and change all related value for influxdb 's plugin.
+  ```
+        publish:
+          -
+            plugin_name: "influxdb"     #do not change this
+            config:
+               host: "IP ADDRESS OF INFLUXDB"
+               port: 8086
+               database: "DATABASE NAME"
+               retention: "default"
+               user: "YOUR USERNAME"
+               password: "YOUR PASSWORD
+               https: true
+               skip-verify: false
+  ```
 ### Running The Test
-In order tor run bencharmk on openstack first you need to source your openrc file from openstack and then run
+In order tor run benchmark on openstack first you need to source your openrc file from openstack and then run
 ```sh
 python run.py -a
 ```
@@ -51,9 +51,9 @@ python run.py -h
     - Keyvalue store (A node running Ubuntu 16.04 with 2GB memory)
     - Manager Host (A node running Ubuntu 16.04 with 4GB memory)
     - Client Host (A node running Ubuntu 16.04 with 8GB memory)
-  - All hosts must be access to the internet
+  - All hosts must be access to the Internet
 
-_**it is possbile to run clinet with lower memory but you have to configure your test propery to avoid craching during the test.**_
+_**it is possible to run client with lower memory but you have to configure your test propery to avoid craching during the test.**_
 ### Running The Test
 In order to conduct a benchmark first you need to setup docker and primary setup.
 
@@ -77,9 +77,9 @@ To run benchmark enter below command
 ```sh
 $ ./benchmark -a
 ```
-This command by defaul creates 2 CloudSuite Servers and 1 Cloudsuite Client. The container for CloudSuite Client would be created on client host. The CloudSuite Client generates request for the CloudSuite Servers and store the output to client host every second. Then SNAP collector reads the output each second and get metrics from that.
-#### Aditional Options
-If you want to custoimze your benchmark you can use following options.
+This command by default creates 2 CloudSuite Servers and 1 Cloudsuite Client. The container for CloudSuite Client would be created on client host. The CloudSuite Client generates request for the CloudSuite Servers and store the output to client host every second. Then SNAP collector reads the output each second and get metrics from that.
+#### Additional Options
+If you want to customize your benchmark you can use following options.
 ```sh
 Usage: ./benchmark.sh [options]
 

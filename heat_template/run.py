@@ -1,3 +1,5 @@
+import yaml
+import json,sys
 import re
 import sys
 import logging
@@ -28,7 +30,7 @@ logging.getLogger('').addHandler(console)
 
 #                                                                       #
 #             H E A T   T E M P L A T E   F U N C T I O N               #
-#                 creat stack using heat template                      #
+#                 create stack using heat template                      #
 
 
 def heat( bechmark_name, action, key_name ):
@@ -114,7 +116,7 @@ def remove_keypair():
 
 #                                                                       #
 #          I P   O F   D O C K E R   S W A R   M A N A G E R            #
-#           get ip of Docker swar manager from created stack            #
+#           get ip of Docker swarm manager from created stack            #
 def get_manager_ip(bechmark_name):
     try:
         output =subprocess.check_output("heat stack-show "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
@@ -139,6 +141,7 @@ def ssh_to(remote_server):
 #                                                                       #
 
 def run_benchmark():
+    metadata()
     create_keypair()
     heat(args.name,"create",key_name)
     get_manager_ip(args.name)
@@ -148,10 +151,64 @@ def run_benchmark():
     ssh_to(get_manager_ip.ip)
 
 #                                                                       #
-#                    R E M O V E   B E C H N M A R K                    #
+#                    R E M O V E   B E N C H M A R K                    #
 #                                                                       #
 def remove_benchmark():
     heat(args.name,"delete", None)
+
+#                                                                       #
+#                M E T A D T A   I N F O R M A T I O N                  #
+#                                                                       #
+
+def metadata():
+        #
+        #    GET STACK INFORMATION
+        #
+        flavors={"Swarm Key Value Store":"","Swarm Manager":"","Swarm Client":""}
+        stream = open("docker-swarm.yaml", "r")
+        docs = yaml.load_all(stream)
+        print("\n          Stack configuration")
+        print("=========================================\n")
+        try:
+            for data in docs:
+                flavors["Swarm Key Value Store"]=data['parameters']['swarm_keyvaluestore_flv']['default']
+                flavors["Swarm Manager"]=data['parameters']['swarm_manager_flv']['default']
+                flavors["Swarm Client"]=data['parameters']['swarm_workers_flv']['default']
+                print("Total Number of VMs:       {}".format(data['parameters']['number_of_node']['default']+2))
+                print("Number of worker VMs:      {}".format(data['parameters']['number_of_node']['default']))
+                print("Image ID:                  {}".format(data['parameters']['image_id']['default']))
+
+        except yaml.YAMLError as exc:
+            print(exc)
+
+        #
+        #    GET HOST INFORMATION
+        #
+        print("Flavors:")
+        for key,value in flavors.items():
+            res=subprocess.Popen("openstack flavor show --format json "+value,stdout=subprocess.PIPE,shell=True)
+            data=res.stdout.read()
+            print("\t{}: {}\n\t[MEMORY: {} CPU: {} DISK: {}]\n".format(key,value,json.loads(data)['ram'],json.loads(data)['vcpus'],json.loads(data)['disk']))
+        #
+        #    GET Benchmark INFORMATION
+        #
+        print("\n       Benchmark configuration")
+        print("=========================================\n")
+        print("        --------- Servers ---------")
+        print("        Number of Server: {}            ".format(args.server_no))
+        print("        Server Threads:   {}            ".format(args.server_threads))
+        print("        dedicated memory: {}            ".format(args.memory))
+        print("        Object Size:      {}            ".format(args.object_size))
+        print("        --------- Client ----------")
+        print("        Client threats:   {}            ".format(args.client_threats))
+        print("        Interval:         {}            ".format(args.interval))
+        print("        Server memory:    {}            ".format(args.server_memory))
+        print("        Scaling factor:   {}            ".format(args.scaling_factor))
+        print("        Fraction:         {}            ".format(args.fraction))
+        print("        Connections:      {}            ".format(args.connection))
+        print("        Duration:         {}            ".format(args.duration))
+
+
 
 
 #                                                                       #
@@ -166,25 +223,28 @@ if __name__ == '__main__':
     parser.add_argument('-R', '--remove_all',help='stop and remove all servers & client', action='store_true' )
 
     parser.add_argument('-n', '--server_no',help='number of server (default: 4)', default="4")
-    parser.add_argument('-tt', '--server_threads',help='number of threads of server (default: 4)', default=4)
-    parser.add_argument('-mm', '--memory',help='dedicated memory (default: 4096)', default=4096)
-    parser.add_argument('-nn', '--object_size',help='object size (default: 550)', default=550)
-    parser.add_argument('-w', '--client_threats',help='number of client threads (default: 4)', default=4)
-    parser.add_argument('-T', '--interval',help='interval between stats printing (default: 1)', default=1)
-    parser.add_argument('-D', '--server_memory',help='size of main memory available to each memcached server in MB (default: 4096)', default=4096)
-    parser.add_argument('-S', '--scaling_factor',help='dataset scaling factor (default: 30)', default=2)
-    parser.add_argument('-t', '--duration',help='runtime of loadtesting in seconds (default: run forever)')
-    parser.add_argument('-g', '--fraction',help='fraction of requests that are gets (default: 0.8)', default=0.8)
-    parser.add_argument('-c', '--connection',help='total TCP connections (default: 200)', default=200)
+    parser.add_argument('-tt', '--server_threads',help='number of threads of server (default: 4)', default="4")
+    parser.add_argument('-mm', '--memory',help='dedicated memory (default: 4096)', default="4096")
+    parser.add_argument('-nn', '--object_size',help='object size (default: 550)', default="550")
+    parser.add_argument('-w', '--client_threats',help='number of client threads (default: 4)', default="4")
+    parser.add_argument('-T', '--interval',help='interval between stats printing (default: 1)', default="1")
+    parser.add_argument('-D', '--server_memory',help='size of main memory available to each memcached server in MB (default: 4096)', default="4096")
+    parser.add_argument('-S', '--scaling_factor',help='dataset scaling factor (default: 30)', default="2")
+    parser.add_argument('-t', '--duration',help='runtime of loadtesting in seconds (default: run forever)', default="0")
+    parser.add_argument('-g', '--fraction',help='fraction of requests that are gets (default: 0.8)', default="0.8")
+    parser.add_argument('-c', '--connection',help='total TCP connections (default: 200)', default="200")
 
     args = parser.parse_args()
+
+
+
 
 #                                                                       #
 #          D E F I N E   P R I M A R Y   V A R I A B L E S              #
 #                                                                       #
 
     output=""
-    key_name = "cs-datacahing"
+    key_name = "cs-datacaching"
     #Number of Docker swarm clients node is equal to number of servers node
     number_of_node=2
 
