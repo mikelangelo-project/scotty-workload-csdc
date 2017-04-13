@@ -37,13 +37,13 @@ def heat( bechmark_name, action, key_name ):
     if action=="create":
         try:
             logging.info("[+] Creating Stack... \n")
-            output =subprocess.check_output("heat stack-create -f docker-swarm.yaml "+bechmark_name+" -P key_name="+key_name+" -P number_of_node="+str(number_of_node) ,stderr=subprocess.STDOUT,shell=True)
+            output =subprocess.check_output("openstack stack create --template docker-swarm.yaml {} --parameter key_name={} --parameter number_of_node={}".format(bechmark_name,key_name,str(number_of_node)) ,stderr=subprocess.STDOUT,shell=True)
             logging.info(output)
             logging.info("\n[!] Creating stack takes few mintues")
             while True:
-                output =subprocess.check_output("heat stack-show "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
-                match = re.search(r'(?<=stack_status).*', output)
-                result=match.group()
+                output =subprocess.Popen("openstack stack show {} --format json".format(bechmark_name),stdout=subprocess.PIPE,shell=True)
+                data=json.loads(output.stdout.read())
+                result=data['stack_status']
                 if "COMPLETE" in result:
                     logging.info("[+] Stack CREATE completed successfully ")
                     break
@@ -63,16 +63,15 @@ def heat( bechmark_name, action, key_name ):
         try:
             remove_keypair()
             logging.info("\n[+] Deleting Stack ...")
-            output =subprocess.check_output("heat stack-delete -y "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
+            output =subprocess.check_output("openstack stack delete -y {}".format(bechmark_name),stderr=subprocess.STDOUT,shell=True)
             logging.info(output)
-            logging.info("\n[!] Deleting ...")
             while i < attempt:
                 try:
-                    output =subprocess.check_output("heat stack-show "+bechmark_name,stderr=subprocess.STDOUT,shell=True)
+                    output =subprocess.check_output("openstack stack show {} --format json".format(bechmark_name),stderr=subprocess.STDOUT,shell=True)
                     i  += 1
                 except subprocess.CalledProcessError as e:
                     logging.error(e.output)
-                    sys.exit
+                    sys.exit()
 
             logging.info("\n[+] Stack successfully deleted")
 
@@ -207,7 +206,7 @@ def metadata():
         print("        Fraction:         {}            ".format(args.fraction))
         print("        Connections:      {}            ".format(args.connection))
         print("        Duration:         {}            ".format(args.duration))
-
+        print("\n")
 
 
 

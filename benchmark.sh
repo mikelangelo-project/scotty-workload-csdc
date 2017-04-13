@@ -28,7 +28,7 @@ Usage: $0 [options]
 	-w  | --client-threats   Number of client threads (default: 4)
 	-T  | --interval         Interval between stats printing (default: 1)
 	-D  | --server-memory    Size of main memory available to each memcached server in MB (default: 4096)
-	-S  | --scaling-factor   Dataset scaling factor (default: 30)
+	-S  | --scaling-factor   Dataset scaling factor (default: 2)
 	-t  | --duration         Runtime of loadtesting in seconds (default: run forever)
 	-g  | --fraction         Fraction of requests that are gets (default: 0.8)
 	-c  | --connections      Total TCP connections (default: 200)
