@@ -354,7 +354,7 @@ then
 	    sleep 1;
 	done;
 	echo -e "[+] Servers are wamred up"
-  echo -e "[+] Running Benchmark ...\n"
+  	echo -e "[+] Running Benchmark ...\n"
 	echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" >> /var/log/benchmark/detail.csv
 	stdbuf -o0 tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
 	sleep 10; # to be sure that we get the output in detail.csv
