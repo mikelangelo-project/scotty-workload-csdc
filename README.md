@@ -37,7 +37,7 @@ Automation and Integration of The CloudSuite Datacaching Benchmark into OpenStac
 ### Running The Test
 In order tor run benchmark on openstack first you need to source your openrc file from openstack and then run
 ```sh
-python run.py -a
+python run.py -a create -N cs-datacaching
 ```
 more option on
 ```sh
@@ -85,8 +85,7 @@ Usage: ./benchmark.sh [options]
 
 -h  | --help             give this help list.
 
--a  | --auto             running whole benchmark and setup automatically
--sa | --stop-all         stop and remove all servers & client
+-a  | --action             Available actions are "create" & "delete
 
 -n  | --server-no        number of server (default: 4)
 -tt | --server-threads   number of threads of server (default: 4)
