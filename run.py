@@ -8,7 +8,7 @@ import subprocess
 from os import chmod
 from fabric.api import *
 from Crypto.PublicKey import RSA
-from resource-deployment import Heat_stack
+from resource_deployment import Heat_stack
 
 
 
