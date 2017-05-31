@@ -1,0 +1,9 @@
+[submodule "asset/python-heat-stack-deployment"]
+	path = asset/python-heat-stack-deployment
+	url = git@gitlab.gwdg.de:mikelangelo/python-heat-stack-deployment.git
+[submodule "asset/asset"]
+	path = asset/asset
+	url = git@gitlab.gwdg.de:mikelangelo/python-heat-stack-deployment.git
+[submodule "asset/resource_deployment"]
+	path = asset/resource_deployment
+	url = git@gitlab.gwdg.de:mikelangelo/python-heat-stack-deployment.git

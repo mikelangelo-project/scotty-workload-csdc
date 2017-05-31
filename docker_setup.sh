@@ -176,7 +176,6 @@ while test $# -gt 0; do
 	  echo "Usage: sudo ${0} <-r ROLE> <-c PATH/TO/FILE> <-n NFS Server>(-h)"
 	  echo "  -r, --role	the role of node, values can be 'keystore' or 'other'"
 	  echo "  -k, --keystore	ip address of keystore server"
-    echo "  -ns, --nfs-server	ip address of NFS server"
 	  echo "  -h, --help	show usage"
 	  exit 0
 	  ;;

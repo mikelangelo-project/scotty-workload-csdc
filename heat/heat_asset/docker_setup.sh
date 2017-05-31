@@ -94,24 +94,6 @@ fi
 }
 
 
-# prepare_env() {
-
-# echo -e "[+] Preparing Environment"
-
-# # if [[ $role == "client" ]]; then
-# #	 sudo bash asset/setup_nfs.sh -r client -ns ${nfs_srv} -nd /var/log/benchmark
-# # fi
-
-# if [[ $role == "manager" ]]; then
-# #	sudo bash asset/setup_nfs.sh -r server -c asset/clients.txt
-# 	mkdir -p /var/log/benchmark
-#   sudo chmod 777 /var/log/benchmark/
-#   echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv
-# 	snap_check
-
-# fi
-# }
-
 #                                                                       #
 #                      D I S P L A Y   U S A G E                        #
 #                                                                       #
@@ -168,8 +150,6 @@ done
 docker_install
 service_check
 docker_config $role $keyValue
-#prepare_env ${nfs_srv}
-# prepare_env
 echo "Docker setup completed successfully."
 
 # EOF
