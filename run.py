@@ -1,8 +1,9 @@
 import sys
+import os
 import logging
 import argparse
 from fabric.api import settings, run, put
-from asset.resource_deployment.resource_deployment import Heat_stack
+from asset.resource_deployment.resource_deployment import HeatStack
 
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
@@ -34,16 +35,17 @@ def ssh_to(remote_server):
 
 
 def deploy_benchmark(action):
-
-    stack = Heat_stack(args.name, 2)
+    root_path = os.path.realpath(__file__)
+    config_path = root_path+"/asset/"
+    stack = HeatStack(args.name, 2,config_path+"stack.yaml")
     if action == "create":
         metadata()
         stack.create_keypair()
         stack.create()
         print "#"
-        logging.info("# Swarm Manager IP address is : "+stack.manager_ip)
+        logging.info("# Swarm Manager IP address is : "+stack.getManagerIP())
         print "#"
-        ssh_to(stack.manager_ip)
+        ssh_to(stack.getManagerIP())
     elif action == "delete":
         stack.delete_keypair()
         stack.delete()
