@@ -128,7 +128,7 @@ resources:
    group: system
    config:
     str_replace:
-     template: { get_file: heat_asset/heat_param.yaml }
+     template: { get_file: resource_deployment/heat_asset/heat_param.yaml }
      params:
       $WAIT_HANDLE: {get_resource: node_wait_handle }
 
@@ -138,7 +138,7 @@ resources:
    group: system
    config:
     str_replace:
-     template: { get_file: heat_asset/enable_login.yaml }
+     template: { get_file: resource_deployment/heat_asset/enable_login.yaml }
      params:
       $empty: ""
 
@@ -147,7 +147,7 @@ resources:
   type: OS::Heat::SoftwareConfig
   properties:
    group: ungrouped
-   config: {get_file: heat_asset/signal.sh}
+   config: {get_file: resource_deployment/heat_asset/signal.sh}
 
  keyvalue_config:
   type: OS::Heat::SoftwareConfig
@@ -155,7 +155,7 @@ resources:
    group: ungrouped
    config:
     str_replace:
-     template: {get_file: heat_asset/docker_setup.sh}
+     template: {get_file: resource_deployment/heat_asset/docker_setup.sh}
      params:
       $role: "keystore"
 
@@ -165,7 +165,7 @@ resources:
    group: ungrouped
    config:
     str_replace:
-     template: {get_file: heat_asset/docker_setup.sh}
+     template: {get_file: resource_deployment/heat_asset/docker_setup.sh}
      params:
       $role: "manager"
 
@@ -178,7 +178,7 @@ resources:
    group: ungrouped
    config:
     str_replace:
-     template: {get_file: heat_asset/docker_setup.sh}
+     template: {get_file: resource_deployment/heat_asset/docker_setup.sh}
      params:
       $role: "client"
       $keyValue: "192.168.2.10"
