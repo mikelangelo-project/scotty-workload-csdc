@@ -5,11 +5,7 @@ import argparse
 from fabric.api import settings, run, put
 from asset.resource_deployment import HeatStack
 
-console = logging.StreamHandler()
-console.setLevel(logging.INFO)
-formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-console.setFormatter(formatter)
-logging.getLogger('').addHandler(console)
+logger = logging.getLogger(__name__)
 
 
 def ssh_to(remote_server):
