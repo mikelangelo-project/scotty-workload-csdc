@@ -53,33 +53,33 @@ def deploy_benchmark(action):
 
 def metadata():
 
-    logging.info("\n       Benchmark configuration")
-    logging.info("=========================================\n")
-    logging.info("        --------- Servers ---------")
-    logging.info(
+    logger.info("\n       Benchmark configuration")
+    logger.info("=========================================\n")
+    logger.info("        --------- Servers ---------")
+    logger.info(
         "        Number of Server: {}            ".format(args.server_no))
-    logging.info("        Server Threads:   {}            ".format(
+    logger.info("        Server Threads:   {}            ".format(
         args.server_threads))
-    logging.info(
+    logger.info(
         "        dedicated memory: {}            ".format(args.memory))
-    logging.info(
+    logger.info(
         "        Object Size:      {}            ".format(args.object_size))
-    logging.info("        --------- Client ----------")
-    logging.info("        Client threats:   {}            ".format(
+    logger.info("        --------- Client ----------")
+    logger.info("        Client threats:   {}            ".format(
         args.client_threats))
-    logging.info(
+    logger.info(
         "        Interval:         {}            ".format(args.interval))
-    logging.info("        Server memory:    {}            ".format(
+    logger.info("        Server memory:    {}            ".format(
         args.server_memory))
-    logging.info("        Scaling factor:   {}            ".format(
+    logger.info("        Scaling factor:   {}            ".format(
         args.scaling_factor))
-    logging.info(
+    logger.info(
         "        Fraction:         {}            ".format(args.fraction))
-    logging.info(
+    logger.info(
         "        Connections:      {}            ".format(args.connection))
-    logging.info(
+    logger.info(
         "        Duration:         {}            ".format(args.duration))
-    logging.info("\n")
+    logger.info("\n")
 
 
 if __name__ == '__main__':
