@@ -36,7 +36,7 @@ def ssh_to(remote_server):
 
 
 def deploy_benchmark(action):
-    root_path = os.path.realpath(__file__)
+    root_path = os.getcwd()
     config_path = root_path + "/asset/"
     stack = HeatStack(args.name, 2, config_path + "stack.yaml")
     if action == "create":
