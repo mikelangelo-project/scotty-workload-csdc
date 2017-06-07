@@ -14,7 +14,7 @@ def ssh_to(remote_server):
         run('mkdir -p ~/benchmark/cs-datacaching')
         put('asset', '~/benchmark/cs-datacaching')
         put('benchmark.sh', '~/benchmark/cs-datacaching')
-        run('sudo chmod 750', '~/benchmark/cs-datacaching/benchmark.sh')
+        run('sudo chmod 750 ~/benchmark/cs-datacaching/benchmark.sh')
         run('echo "[+] Installing SNAP ....."')
         run('sudo curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash')
         run('sudo apt-get install -y snap-telemetry')
