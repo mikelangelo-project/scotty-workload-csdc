@@ -18,7 +18,7 @@ def ssh_to(remote_server):
         run('echo "[+] Installing SNAP ....."')
         run('sudo curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash')
         run('sudo apt-get install -y snap-telemetry')
-        run('sudo service snaptel restart')
+        run('sudo service snap-telemetry restart')
         run('sudo mkdir -p /var/log/benchmark')
         run('sudo chmod 777 /var/log/benchmark/')
         run('sudo echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv')
