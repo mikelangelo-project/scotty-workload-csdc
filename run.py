@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def ssh_to(remote_server):
     logging.info("\n# Swarm Manager IP address is : " + remote_server)
-    with settings(host_string=remote_server, key_filename="/tmp/private.key", user="ubuntu"):
+    with settings(host_string=remote_server, key_filename="/tmp/private.key", user="cloud"):
         run('mkdir -p ~/benchmark/cs-datacaching')
         put('asset', '~/benchmark/cs-datacaching')
         put('benchmark.sh', '~/benchmark/cs-datacaching')
@@ -43,8 +43,7 @@ def deploy_benchmark(action):
         filehandler = open('/tmp/stack.obj', 'w')
         pickle.dump(object, filehandler)
         ssh_to(stack.getManagerIP())
-    elif:
-        action == "repeat"
+    elif action == "repeat":
         filehandler = open('/tmp/stack.obj', 'r')
         pickle.load(object, filehandler)
         ssh_to(stack.getManagerIP())
