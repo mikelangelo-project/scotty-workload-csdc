@@ -2,14 +2,16 @@ import sys
 import os
 import logging
 import argparse
+import pickle
 from fabric.api import settings, run, put
 from asset.resource_deployment import HeatStack
+logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 
 def ssh_to(remote_server):
-
+    logging.info("\n# Swarm Manager IP address is : " + remote_server)
     with settings(host_string=remote_server, key_filename="/tmp/private.key", user="ubuntu"):
         run('mkdir -p ~/benchmark/cs-datacaching')
         put('asset', '~/benchmark/cs-datacaching')
@@ -18,7 +20,7 @@ def ssh_to(remote_server):
         run('echo "[+] Installing SNAP ....."')
         run('sudo curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash')
         run('sudo apt-get install -y snap-telemetry')
-        run('sudo service snaptel restart')
+        run('sudo service snap-telemetry restart')
         run('sudo mkdir -p /var/log/benchmark')
         run('sudo chmod 777 /var/log/benchmark/')
         run('sudo echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv')
@@ -38,16 +40,20 @@ def deploy_benchmark(action):
         metadata()
         stack.create_keypair()
         stack.create()
-        print "#"
-        logging.info("# Swarm Manager IP address is : " + stack.getManagerIP())
-        print "#"
+        filehandler = open('/tmp/stack.obj', 'w')
+        pickle.dump(object, filehandler)
+        ssh_to(stack.getManagerIP())
+    elif:
+        action == "repeat"
+        filehandler = open('/tmp/stack.obj', 'r')
+        pickle.load(object, filehandler)
         ssh_to(stack.getManagerIP())
     elif action == "delete":
         stack.delete_keypair()
         stack.delete()
     else:
         logging.warning(
-            "The action is not defined. please use create or delete")
+            "The action is not defined. please use create, delete, repeat")
         sys.exit()
 
 
@@ -89,7 +95,7 @@ if __name__ == '__main__':
         '-N', '--name', help='Benchmark name. default: cs-datacaching', default='cs-datacaching')
 
     parser.add_argument(
-        '-a', '--action', help='Available actions are "create" & "delete"')
+        '-a', '--action', help='Available actions are "create, delete, repeat" ')
 
     parser.add_argument('-n', '--server_no',
                         help='number of server (default: 4)', default="4")
