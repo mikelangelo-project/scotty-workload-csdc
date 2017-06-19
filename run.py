@@ -2,11 +2,10 @@ import sys
 import os
 import logging
 import argparse
-import pickle
 from fabric.api import settings, run, put
 from asset.resource_deployment import HeatStack
-logging.basicConfig(level=logging.INFO)
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -38,21 +37,13 @@ def deploy_benchmark(action):
     stack = HeatStack(args.name, 2, config_path + "stack.yaml")
     if action == "create":
         metadata()
-        stack.create_keypair()
         stack.create()
-        filehandler = open('/tmp/stack.obj', 'w')
-        pickle.dump(object, filehandler)
-        ssh_to(stack.getManagerIP())
-    elif action == "repeat":
-        filehandler = open('/tmp/stack.obj', 'r')
-        pickle.load(object, filehandler)
         ssh_to(stack.getManagerIP())
     elif action == "delete":
-        stack.delete_keypair()
         stack.delete()
     else:
         logging.warning(
-            "The action is not defined. please use create, delete, repeat")
+            "The action is not defined. please use create, delete")
         sys.exit()
 
 
@@ -94,7 +85,7 @@ if __name__ == '__main__':
         '-N', '--name', help='Benchmark name. default: cs-datacaching', default='cs-datacaching')
 
     parser.add_argument(
-        '-a', '--action', help='Available actions are "create, delete, repeat" ')
+        '-a', '--action', help='Available actions are "create, delete" ')
 
     parser.add_argument('-n', '--server_no',
                         help='number of server (default: 4)', default="4")

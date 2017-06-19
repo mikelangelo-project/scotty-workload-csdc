@@ -13,6 +13,7 @@ Automation and Integration of The CloudSuite Datacaching Benchmark into OpenStac
   - Minimum of 3 VCPU
   - access to Openstack heat API
   - python Fabric library
+  - pycrypto library
   - source openrc file from openstack
   - An installed Influxdb
 
@@ -37,7 +38,7 @@ Automation and Integration of The CloudSuite Datacaching Benchmark into OpenStac
 ### Running The Test
 In order tor run benchmark on openstack first you need to source your openrc file from openstack and then run
 ```sh
-python run.py -a create -N cs-datacaching
+python run.py -a create
 ```
 more option on
 ```sh
