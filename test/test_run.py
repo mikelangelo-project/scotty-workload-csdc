@@ -23,6 +23,7 @@ namespace={
 		'fraction': '0.8',
 		'connection': '220'
     }
+
 class CloudSuiteTest(unittest.TestCase):
 
 	@mock.patch('argparse.ArgumentParser.parse_args',return_value=argparse.Namespace(**namespace))
@@ -30,6 +31,9 @@ class CloudSuiteTest(unittest.TestCase):
 	@mock.patch('asset.resource_deployment.HeatStack.create')
 	@mock.patch('run.ssh_to')
 	def test_deploy_benchmark(self,ssh,create,delete,args):
+		actions={'create','delete'}
+		if not args.return_value.action in actions :
+			raise(TypeError)
 		with mock.patch.object(sys, 'argv',args):
 		    environ_mock = {
 				'OS_AUTH_URL': 'OS_AUTH_URL',
@@ -40,10 +44,3 @@ class CloudSuiteTest(unittest.TestCase):
 		    }
 		    with mock.patch.dict(os.environ, environ_mock):
 		    	run.deploy_benchmark(args.return_value)
-
-	@mock.patch('argparse.ArgumentParser.parse_args',return_value=argparse.Namespace(**namespace))
-	def test_metadata(self,args):
-		actions={'create','delete'}
-		if not args.return_value.action in actions :
-			raise(TypeError)
-		run.metadata(args.return_value)
