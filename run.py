@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def ssh_to(remote_server):
+def ssh_to(args,remote_server):
     logging.info("\n# Swarm Manager IP address is : " + remote_server)
     with settings(host_string=remote_server, key_filename="/tmp/private.key", user="cloud"):
         run('mkdir -p ~/benchmark/cs-datacaching')
@@ -31,23 +31,22 @@ def ssh_to(remote_server):
         )
 
 
-def deploy_benchmark(action):
+def deploy_benchmark(args):
     root_path = os.getcwd()
     config_path = root_path + "/asset/"
     stack = HeatStack(args.name, 2, config_path + "stack.yaml")
-    if action == "create":
-        metadata()
+    if args.action == "create":
+        metadata(args)
         stack.create()
-        ssh_to(stack.getManagerIP())
-    elif action == "delete":
+        ssh_to(args,stack.getManagerIP())
+    elif args.action == "delete":
         stack.delete()
     else:
-        logging.warning(
-            "The action is not defined. please use create, delete")
-        sys.exit()
+        raise Exception('The action is not defined. please use create, delete')
 
 
-def metadata():
+
+def metadata(args):
 
     logger.info("\n       Benchmark configuration")
     logger.info("=========================================\n")
@@ -78,8 +77,7 @@ def metadata():
     logger.info("\n")
 
 
-if __name__ == '__main__':
-
+def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-N', '--name', help='Benchmark name. default: cs-datacaching', default='cs-datacaching')
@@ -109,11 +107,13 @@ if __name__ == '__main__':
         '-g', '--fraction', help='fraction of requests that are gets (default: 0.8)', default="0.8")
     parser.add_argument(
         '-c', '--connection', help='total TCP connections (default: 200)', default="200")
+    return parser.parse_args(args)
 
-    args = parser.parse_args()
+if __name__ == '__main__':
+    args = parse_args(sys.argv[1:])
     output = ""
     key_name = "cs-datacaching"
     if args.action:
-        deploy_benchmark(args.action)
+        deploy_benchmark(args)
     else:
         parser.print_help()
