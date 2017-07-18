@@ -85,7 +85,7 @@ create_server () {
 	# Reading number of server from argument
 	for i in $(seq 1 1 $n)
 	do
-		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i -e constraint:node!=$(hostname) --network $network_name -d cloudsuite/data-caching:server -t $tt -m $mm -n $nn
+		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i -e constraint:node==$(hostname) --network $network_name -d cloudsuite/data-caching:server -t $tt -m $mm -n $nn
 		echo -e "[+] Server $i is ready"
 	done
 
