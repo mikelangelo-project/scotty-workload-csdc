@@ -2,7 +2,7 @@ import sys
 import os
 import logging
 import argparse
-from fabric.api import settings, run, put
+from fabric.api import settings, run as fabric_run, put, env
 from asset.resource_deployment import HeatStack
 
 logging.basicConfig(level=logging.INFO)
@@ -11,40 +11,43 @@ logger = logging.getLogger(__name__)
 
 class DataCaching():
 
-    server_no = context.v1.workload_config['params']['server_no']
-    server_threads = context.v1.workload_config['params']['server_threads']
-    memory = context.v1.workload_config['params']['memory']
-    object_size = context.v1.workload_config['params']['object_size']
-    client_threats = context.v1.workload_config['params']['client_threats']
-    interval = context.v1.workload_config['params']['interval']
-    server_memory = context.v1.workload_config['params']['server_memory']
-    scaling_factor = context.v1.workload_config['params']['scaling_factor']
-    duration = context.v1.workload_config['params']['duration']
-    fraction = context.v1.workload_config['params']['fraction']
-    connection = context.v1.workload_config['params']['connection']
+    server_no = ""
+    server_threads = ""
+    memory = ""
+    object_size = ""
+    client_threats = ""
+    interval = ""
+    server_memory = ""
+    scaling_factor = ""
+    duration = ""
+    fraction = ""
+    connection = ""
 
-    def ssh_to(self, remote_server):
+    def ssh_to(self, root_path, remote_server):
         logging.info("\n# Swarm Manager IP address is : " + remote_server)
         with settings(host_string=remote_server, key_filename="/tmp/private.key", user="cloud"):
-            run('mkdir -p ~/benchmark/cs-datacaching')
-            put('asset', '~/benchmark/cs-datacaching')
-            put('benchmark.sh', '~/benchmark/cs-datacaching')
-            run('sudo chmod 750 ~/benchmark/cs-datacaching/benchmark.sh')
-            run('echo "[+] Installing SNAP ....."')
-            run('sudo curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash')
-            run('sudo apt-get install -y snap-telemetry')
-            run('sudo service snap-telemetry restart')
-            run('sudo mkdir -p /var/log/benchmark')
-            run('sudo chmod 777 /var/log/benchmark/')
-            run('sudo echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv')
-            run(
-                "cd ~/benchmark/cs-datacaching/ && ./benchmark.sh -a -n " + server_no +
-                " -tt " + server_threads + " -mm " + memory + " -nn " + object_size + " -w " + client_threats +
-                " -T " + interval + " -D " + server_memory + " -S " + scaling_factor +
-                " -t " + duration + " -g " + fraction + " -c " + connection
+            fabric_run('mkdir -p ~/benchmark/cs-datacaching')
+            put(root_path + '/asset/', '~/benchmark/cs-datacaching/')
+            put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
+            fabric_run('sudo chmod 750 ~/benchmark/cs-datacaching/benchmark.sh')
+            fabric_run('echo "[+] Installing SNAP ....."')
+            fabric_run(
+                'sudo curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash')
+            fabric_run('sudo apt-get install -y snap-telemetry')
+            fabric_run('sudo service snap-telemetry restart')
+            fabric_run('sudo mkdir -p /var/log/benchmark')
+            fabric_run('sudo chmod 777 /var/log/benchmark/')
+            fabric_run(
+                'sudo echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv')
+            print type(self.connection)
+            fabric_run(
+                "cd ~/benchmark/cs-datacaching/ && ./benchmark.sh -a -n " + self.server_no +
+                " -tt " + self.server_threads + " -mm " + self.memory + " -nn " + self.object_size + " -w " + self.client_threats +
+                " -T " + self.interval + " -D " + self.server_memory + " -S " + self.scaling_factor +
+                " -t " + self.duration + " -g " + self.fraction + " -c " + self.connection
             )
 
-    def deploy_benchmark(self, action):
+    def deploy_benchmark(self, name, action):
         root_path = os.getcwd()
         config_path = root_path + "/asset/"
         stack = HeatStack(name, 1, config_path + "stack.yaml")
@@ -65,33 +68,53 @@ class DataCaching():
         logger.info("=========================================\n")
         logger.info("        --------- Servers ---------")
         logger.info(
-            "        Number of Server: {}            ".format(server_no))
+            "        Number of Server: {}            ".format(self.server_no))
         logger.info("        Server Threads:   {}            ".format(
-            server_threads))
+            self.server_threads))
         logger.info(
-            "        dedicated memory: {}            ".format(memory))
+            "        dedicated memory: {}            ".format(self.memory))
         logger.info(
-            "        Object Size:      {}            ".format(object_size))
+            "        Object Size:      {}            ".format(self.object_size))
         logger.info("        --------- Client ----------")
         logger.info("        Client threats:   {}            ".format(
-            client_threats))
+            self.client_threats))
         logger.info(
-            "        Interval:         {}            ".format(interval))
+            "        Interval:         {}            ".format(self.interval))
         logger.info("        Server memory:    {}            ".format(
-            server_memory))
+            self.server_memory))
         logger.info("        Scaling factor:   {}            ".format(
-            scaling_factor))
+            self.scaling_factor))
         logger.info(
-            "        Fraction:         {}            ".format(fraction))
+            "        Fraction:         {}            ".format(self.fraction))
         logger.info(
-            "        Connections:      {}            ".format(connection))
+            "        Connections:      {}            ".format(self.connection))
         logger.info(
-            "        Duration:         {}            ".format(duration))
+            "        Duration:         {}            ".format(self.duration))
         logger.info("\n")
 
 
 def run(context):
+
     dcWorkload = DataCaching()
-    key_name = "cs-datacaching"
+    dcWorkload.server_no = str(context.v1.workload_config[
+                               'params']['server_no'])
+    dcWorkload.server_threads = str(context.v1.workload_config[
+                                    'params']['server_threads'])
+    dcWorkload.memory = str(context.v1.workload_config['params']['memory'])
+    dcWorkload.object_size = str(context.v1.workload_config[
+        'params']['object_size'])
+    dcWorkload.client_threats = str(context.v1.workload_config[
+        'params']['client_threats'])
+    dcWorkload.interval = str(context.v1.workload_config['params']['interval'])
+    dcWorkload.server_memory = str(context.v1.workload_config[
+        'params']['server_memory'])
+    dcWorkload.scaling_factor = str(context.v1.workload_config[
+        'params']['scaling_factor'])
+    dcWorkload.duration = str(context.v1.workload_config['params']['duration'])
+    dcWorkload.fraction = str(context.v1.workload_config['params']['fraction'])
+    dcWorkload.connection = str(context.v1.workload_config[
+                                'params']['connection'])
+
+    key_name = "csdcWorkload"
     action = 'create'
-    dcWorkload.deploy_benchmark(action)
+    dcWorkload.deploy_benchmark(key_name, action)
