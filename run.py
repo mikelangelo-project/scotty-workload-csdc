@@ -5,7 +5,6 @@ import argparse
 from fabric.api import settings, run as fabric_run, put, env
 from asset.resource_deployment import HeatStack
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +53,8 @@ class DataCaching():
         if action == "create":
             self.metadata()
             stack.create()
-            self.ssh_to(stack.getManagerIP())
+            self.ssh_to(root_path, stack.getManagerIP())
+
         elif action == "delete":
             stack.delete()
         else:
@@ -97,9 +97,9 @@ def run(context):
 
     dcWorkload = DataCaching()
     dcWorkload.server_no = str(context.v1.workload_config[
-                               'params']['server_no'])
+        'params']['server_no'])
     dcWorkload.server_threads = str(context.v1.workload_config[
-                                    'params']['server_threads'])
+        'params']['server_threads'])
     dcWorkload.memory = str(context.v1.workload_config['params']['memory'])
     dcWorkload.object_size = str(context.v1.workload_config[
         'params']['object_size'])
@@ -113,7 +113,7 @@ def run(context):
     dcWorkload.duration = str(context.v1.workload_config['params']['duration'])
     dcWorkload.fraction = str(context.v1.workload_config['params']['fraction'])
     dcWorkload.connection = str(context.v1.workload_config[
-                                'params']['connection'])
+        'params']['connection'])
 
     key_name = "csdcWorkload"
     action = 'create'

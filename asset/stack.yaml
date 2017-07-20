@@ -36,12 +36,12 @@ parameters:
  swarm_manager_flv:
   type: string
   description: flavor for swarm manager host
-  default: kvm.m3.medium
+  default: kvm.m2.medium
 
  swarm_workers_flv:
   type: string
   description: flavor for swarm worker hosts
-  default : kvm.m1.small
+  default : kvm.m3.medium
 
  image_id:
   type: string
@@ -415,7 +415,7 @@ resources:
 
       echo -e "[+] Setting up $role"
       if [[ $role == "keystore" ]]; then
-        sudo dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock &
+        sudo dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --mtu=1400 &
         sleep 2
         sudo docker stop consul
         sudo docker rm -f consul
@@ -424,7 +424,7 @@ resources:
       fi
 
       if [[ $role != "keystore" ]]; then
-      sudo dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://$keyValue:8500  --cluster-advertise=${host_ip}:2376 &
+      sudo dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --mtu=1400 --cluster-store=consul://$keyValue:8500  --cluster-advertise=${host_ip}:2376 &
       sleep 5
       fi
 
