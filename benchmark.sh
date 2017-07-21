@@ -41,15 +41,16 @@ EOF
 #                                                                       #
 ps=$(sudo docker -H :4000 ps --filter "name=dc-" -a -q)
 network() {
+sudo docker -H:4000 network rm caching_network
+
 network_name="caching_network"
 
 	echo -e "---> Netowrk name : $network_name"
-
 	network=$(sudo docker network ls -f NAME=$network_name -q)
 	if [ -z "$network" ];
 		then
-			sudo docker network create --driver overlay $network_name
-			echo -e "    [+] Network created"
+			sudo docker -H:4000 network create --opt com.docker.network.driver.mtu=1450 --driver overlay $network_name
+			echo -e "[+] Network created"
 		else
 			echo -e "---> Network Exist"
 	fi
@@ -100,7 +101,6 @@ create_client () {
 
       # By default docker swarm manager join as docker swarm node \
 			# to host cloudsuite datacaching client container.
-
 
 	echo -e "\n[+]  Creating Client\n"
 
@@ -342,9 +342,9 @@ then
 	echo -e "                                         "
 	echo -e "+---------------------------------------+"
 
-	network
 	sudo rm -rf /var/log/benchmark/*
 	remove_all
+	network
 	create_server
 	create_client
 	load_snap_plugin
