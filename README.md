@@ -86,7 +86,7 @@ Usage: ./benchmark.sh [options]
 
 -h  | --help             give this help list.
 
--a  | --action             Available actions are "create" & "delete
+-a  | --action           Available actions are "create" & "delete"
 
 -n  | --server-no        number of server (default: 4)
 -tt | --server-threads   number of threads of server (default: 4)
