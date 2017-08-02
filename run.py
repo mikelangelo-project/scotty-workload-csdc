@@ -54,7 +54,6 @@ class DataCaching():
             self.metadata()
             stack.create()
             self.ssh_to(root_path, stack.getManagerIP())
-            # self.ssh_to(root_path, '141.5.113.42')
         elif action == "delete":
             stack.delete()
         else:
