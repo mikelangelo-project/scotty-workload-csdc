@@ -1,7 +1,7 @@
 import unittest
 import sys
 import os
-import run as main
+import run
 import mock
 import argparse
 import asset.resource_deployment
@@ -23,16 +23,16 @@ inputArgs = {
                 'fraction': '0.8',
                 'connection': '220'
 }
-main.DataCaching.server_no = inputArgs['server_no']
-main.DataCaching.memory = inputArgs['memory']
-main.DataCaching.object_size = inputArgs['object_size']
-main.DataCaching.client_threats = inputArgs['client_threats']
-main.DataCaching.interval = inputArgs['interval']
-main.DataCaching.server_memory = inputArgs['server_memory']
-main.DataCaching.scaling_factor = inputArgs['scaling_factor']
-main.DataCaching.duration = inputArgs['duration']
-main.DataCaching.fraction = inputArgs['fraction']
-main.DataCaching.connection = inputArgs['connection']
+run.DataCaching.server_no = inputArgs['server_no']
+run.DataCaching.memory = inputArgs['memory']
+run.DataCaching.object_size = inputArgs['object_size']
+run.DataCaching.client_threats = inputArgs['client_threats']
+run.DataCaching.interval = inputArgs['interval']
+run.DataCaching.server_memory = inputArgs['server_memory']
+run.DataCaching.scaling_factor = inputArgs['scaling_factor']
+run.DataCaching.duration = inputArgs['duration']
+run.DataCaching.fraction = inputArgs['fraction']
+run.DataCaching.connection = inputArgs['connection']
 
 
 class CloudSuiteTest(unittest.TestCase):
@@ -40,12 +40,11 @@ class CloudSuiteTest(unittest.TestCase):
     @mock.patch('argparse.ArgumentParser.parse_args', return_value=argparse.Namespace(**inputArgs))
     @mock.patch('asset.resource_deployment.HeatStack.delete')
     @mock.patch('asset.resource_deployment.HeatStack.create')
+    @mock.patch('run.DataCaching.metadata')
     @mock.patch('run.DataCaching.ssh_to')
-    def test_deploy_benchmark(self, ssh_to, create, delete, args):
+    def test_deploy_benchmark(self, ssh_to, metadata, create, delete, args):
         actions = {'create', 'delete'}
-        self.assertEqual(args.return_value.action, "create")
-        if not args.return_value.action in actions:
-            raise(TypeError)
+        self.assertIn(args.return_value.action, {"create", "delete"})
         with mock.patch.object(sys, 'argv', args):
             environ_mock = {
                 'OS_AUTH_URL': 'OS_AUTH_URL',
@@ -55,12 +54,18 @@ class CloudSuiteTest(unittest.TestCase):
                 'OS_PROJECT_NAME': 'OS_PROJECT_NAME',
             }
             with mock.patch.dict(os.environ, environ_mock):
-                main.DataCaching().deploy_benchmark(
+                run.DataCaching().deploy_benchmark(
                     args.return_value.name, args.return_value.action)
+                self.assertTrue(metadata.called)
+                self.assertTrue(create.called or delete.called)
+                self.assertTrue(ssh_to.called)
 
     def test_metadata(self):
-        main.DataCaching().metadata()
+        run.DataCaching().metadata()
 
     @mock.patch('run.DataCaching.ssh_to')
     def test_ssh_to(self, ssh_to):
-        main.DataCaching().ssh_to()
+        root_path = os.getcwd()
+        config_path = root_path + "/asset/"
+        run.DataCaching().ssh_to(config_path, '1.1.1.1')
+        self.assertTrue(ssh_to.called)
