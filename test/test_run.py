@@ -7,7 +7,7 @@ import argparse
 import asset.resource_deployment
 
 
-namespace = {
+inputArgs = {
 
     'name': 'name',
     'action': 'create',
@@ -23,26 +23,27 @@ namespace = {
                 'fraction': '0.8',
                 'connection': '220'
 }
-main.DataCaching.server_no = namespace['server_no']
-main.DataCaching.memory = namespace['memory']
-main.DataCaching.object_size = namespace['object_size']
-main.DataCaching.client_threats = namespace['client_threats']
-main.DataCaching.interval = namespace['interval']
-main.DataCaching.server_memory = namespace['server_memory']
-main.DataCaching.scaling_factor = namespace['scaling_factor']
-main.DataCaching.duration = namespace['duration']
-main.DataCaching.fraction = namespace['fraction']
-main.DataCaching.connection = namespace['connection']
+main.DataCaching.server_no = inputArgs['server_no']
+main.DataCaching.memory = inputArgs['memory']
+main.DataCaching.object_size = inputArgs['object_size']
+main.DataCaching.client_threats = inputArgs['client_threats']
+main.DataCaching.interval = inputArgs['interval']
+main.DataCaching.server_memory = inputArgs['server_memory']
+main.DataCaching.scaling_factor = inputArgs['scaling_factor']
+main.DataCaching.duration = inputArgs['duration']
+main.DataCaching.fraction = inputArgs['fraction']
+main.DataCaching.connection = inputArgs['connection']
 
 
 class CloudSuiteTest(unittest.TestCase):
 
-    @mock.patch('argparse.ArgumentParser.parse_args', return_value=argparse.Namespace(**namespace))
+    @mock.patch('argparse.ArgumentParser.parse_args', return_value=argparse.Namespace(**inputArgs))
     @mock.patch('asset.resource_deployment.HeatStack.delete')
     @mock.patch('asset.resource_deployment.HeatStack.create')
     @mock.patch('run.DataCaching.ssh_to')
     def test_deploy_benchmark(self, ssh_to, create, delete, args):
         actions = {'create', 'delete'}
+        self.assertEqual(args.return_value.action, "create")
         if not args.return_value.action in actions:
             raise(TypeError)
         with mock.patch.object(sys, 'argv', args):
