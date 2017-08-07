@@ -38,12 +38,12 @@ class DataCaching():
             fabric_run('sudo chmod 777 /var/log/benchmark/')
             fabric_run(
                 'sudo echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv')
-            fabric_run(
-                "cd ~/benchmark/cs-datacaching/ && ./benchmark.sh -a -n " + self.server_no +
-                " -tt " + self.server_threads + " -mm " + self.memory + " -nn " + self.object_size + " -w " + self.client_threats +
-                " -T " + self.interval + " -D " + self.server_memory + " -S " + self.scaling_factor +
-                " -t " + self.duration + " -g " + self.fraction + " -c " + self.connection
-            )
+            fabric_run("cd ~/benchmark/cs-datacaching/ &&  ./benchmark.sh -a -n " + self.server_no +
+                       " -tt " + self.server_threads + " -mm " + self.memory + " -nn " + self.object_size + " -w " + self.client_threats +
+                       " -T " + self.interval + " -D " + self.server_memory + " -S " + self.scaling_factor +
+                       " -t " + self.duration + " -g " + self.fraction + " -c " +
+                       self.connection
+                       )
 
     def deploy_benchmark(self, name, action):
         root_path = os.getcwd()
