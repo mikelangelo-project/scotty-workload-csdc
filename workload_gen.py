@@ -4,7 +4,6 @@ import logging
 import datetime
 import argparse
 from fabric.api import settings, run as fabric_run, put, env
-from asset.resource_deployment import HeatStack
 from scotty import utils
 
 
