@@ -118,7 +118,7 @@ def run(context):
     )
     end_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-    file = open("/tmp/PostRunInfo", "w")
+    file = open("/tmp/PostRunInfo.txt", "w")
     file.write("{}\n{}\n{}".format(demo_resource.config['params'][
                'exp_name'], str(start_time), str(end_time)))
     file.close()
