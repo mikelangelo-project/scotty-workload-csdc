@@ -111,8 +111,6 @@ def run(context):
     root_path = os.path.abspath('') + "/workload/" + workload.name
     dcWorkload.metadata()
     start_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    import time
-    time.sleep(2)
 
     dcWorkload.ssh_to(
         root_path,

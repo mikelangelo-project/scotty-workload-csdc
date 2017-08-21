@@ -282,6 +282,14 @@ resources:
       sudo docker run -d --name swarm_$role_node swarm join --advertise=${host_ip}:2375 consul://$keyValue:8500 > /dev/null &&
       echo -e "[+] $HOST joined as node"
       fi
+
+      number_of_swarm_client=0
+      echo "Wiating for the other nodes to join the cluster ..."
+      while [ $number_of_swarm_client -lt 2 ]; do
+      number_of_swarm_client=$(sudo docker -H :4000 info | grep Nodes | sed 's/^Nodes: //')
+      sleep 2
+      done
+      echo -e "[+] Swarm is ready to use"
       }
 
 
@@ -424,8 +432,13 @@ resources:
       fi
 
       if [[ $role != "keystore" ]]; then
+      is_200_ok=0
+      echo "Waiting for Key Value Service ..."
+      while [ $is_200_ok != 1 ]; do
+      is_200_ok=$(wget --server-response http://$keyValue:8500 -O ip-current 2>&1| grep -c 'HTTP/1.1 200 OK')
+      sleep 2
+      done
       sudo dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --mtu=1400 --cluster-store=consul://$keyValue:8500  --cluster-advertise=${host_ip}:2376 &
-      sleep 5
       fi
 
       if [[ $role != "keystore" ]]; then
@@ -442,13 +455,23 @@ resources:
 
       if [[ $role == "manager" ]]; then
         sudo docker run -d --name swarm_$role -p 4000:4000 swarm manage -H :4000 --replication --advertise ${host_ip}:4000 consul://$keyValue:8500 > /dev/null &&
+
       echo -e "[+] Swarm manager is ready"
       fi
+
       ## if you want that manager take role as a member in cluster make roll to !=keystore
       if [[ $role != "keystore" ]]; then
       sudo docker run -d --name swarm_$role_node swarm join --advertise=${host_ip}:2375 consul://$keyValue:8500 > /dev/null &&
       echo -e "[+] $HOST joined as node"
       fi
+
+      number_of_swarm_client=0
+      echo "Wiating for the other nodes to join the cluster ..."
+      while [ $number_of_swarm_client -lt 2 ]; do
+      number_of_swarm_client=$(sudo docker -H :4000 info | grep Nodes | sed 's/^Nodes: //')
+      sleep 2
+      done
+      echo -e "[+] Swarm is ready to use"
       }
 
 
@@ -617,6 +640,14 @@ resources:
       sudo docker run -d --name swarm_$role_node swarm join --advertise=${host_ip}:2375 consul://$keyValue:8500 > /dev/null &&
       echo -e "[+] $HOST joined as node"
       fi
+
+      number_of_swarm_client=0
+      echo "Wiating for the other nodes to join the cluster ..."
+      while [ $number_of_swarm_client -lt 2 ]; do
+      number_of_swarm_client=$(sudo docker -H :4000 info | grep Nodes | sed 's/^Nodes: //')
+      sleep 2
+      done
+      echo -e "[+] Swarm is ready to use"
       }
 
 

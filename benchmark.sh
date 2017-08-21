@@ -82,8 +82,6 @@ create_server () {
 
 
 	echo -e "\n[+] Creating Servers\n"
-
-	# Reading number of server from argument
 	for i in $(seq 1 1 $n)
 	do
 		sudo docker -H :4000 run --name dc-server$i --hostname dc-server$i -e constraint:node!=$(hostname) --network $network_name -d cloudsuite/data-caching:server -t $tt -m $mm -n $nn
@@ -174,7 +172,7 @@ echo -e "[*] Cloudsuite-datacaching Collector Plugin Loaded\n"
 create_snap_task() {
 
 echo -e "[+] Creating SNAP Task ....."
-snaptel task create -t asset/snap/datacaching-task.yaml  && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
+snaptel task create -t asset/snap/datacaching-task.yaml && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
 
 }
 
@@ -356,9 +354,11 @@ then
 	echo -e "[+] Servers are wamred up"
   	echo -e "[+] Running Benchmark ...\n"
 	echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" >> /var/log/benchmark/detail.csv
-	stdbuf -o0 tail -f /var/log/benchmark/benchmark.log | stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
+	nohup stdbuf -o0 tail -f /var/log/benchmark/benchmark.log | nohup stdbuf -o0 awk -f asset/output.awk >> /var/log/benchmark/detail.csv&
 	sleep 10; # to be sure that we get the output in detail.csv
 	create_snap_task
-	stdbuf -o0 snaptel task watch $(snaptel task list | cut -f 1 | tail -n +2 | tail)
-	echo -e "[+] The Benchmark is running in the background\n"
+	# stdbuf -o0 snaptel task watch $(snaptel task list | cut -f 1 | tail -n +2 | tail)
+	echo -e "[+] The Benchmark is running in the background"
+	echo -e "[!] The benchmark takes $t seconds to be completed"
+	sleep $t;
 fi
