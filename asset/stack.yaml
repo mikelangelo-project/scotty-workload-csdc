@@ -759,6 +759,11 @@ resources:
  KeyValue:
   type: OS::Nova::Server
   properties:
+   name:
+       str_replace:
+           template: $STACK-KeyValue
+           params:
+               $STACK: { get_param: "OS::stack_name" }
    image: { get_param: image_id }
    flavor: { get_param: swarm_keyvaluestore_flv }
    key_name: { get_param: key_name }
@@ -771,6 +776,11 @@ resources:
  Manager:
   type: OS::Nova::Server
   properties:
+   name:
+       str_replace:
+           template: $STACK-Manager
+           params:
+               $STACK: { get_param: "OS::stack_name" }
    image: { get_param: image_id }
    flavor: { get_param: swarm_manager_flv }
    key_name: { get_param: key_name }
@@ -786,6 +796,11 @@ resources:
    resource_def:
     type: OS::Nova::Server
     properties:
+     name:
+        str_replace:
+            template: $STACK-Client-%index%
+            params:
+                $STACK: { get_param: "OS::stack_name" }
      image: { get_param: image_id }
      flavor: { get_param: swarm_workers_flv }
      key_name: { get_param: key_name }
