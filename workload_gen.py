@@ -4,6 +4,7 @@ import logging
 import datetime
 import argparse
 from fabric.api import settings, run as fabric_run, put, env
+from asset.resource_deployment import HeatStack
 from scotty import utils
 
 
@@ -27,7 +28,7 @@ class DataCaching():
     def ssh_to(self, root_path, key_path, remote_server):
         logging.info("\n# Swarm Manager IP address is : " + remote_server)
         with settings(host_string=remote_server, key_filename="/tmp/" + key_path + "/private.key", user="cloud"):
-            fabric_run('mkdir -p ~/benchmark/cs-datacaching')
+            fabric_run('[ -d ~/benchmark/cs-datacaching ] || mkdir -p ~/benchmark/cs-datacaching')
             put(root_path + '/asset/', '~/benchmark/cs-datacaching/')
             put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
             fabric_run('sudo chmod 750 ~/benchmark/cs-datacaching/benchmark.sh')
@@ -110,15 +111,17 @@ def run(context):
     root_path = os.path.abspath('') + "/workload/" + workload.name
     dcWorkload.metadata()
     start_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-
     dcWorkload.ssh_to(
         root_path,
         demo_resource.config['params']['exp_name'],
         demo_resource.endpoint['ip']
     )
     end_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    file_path ="/tmp/" + demo_resource.config['params']['exp_name']+ "/" + workload.name
+    if not os.path.exists(file_path):
+        os.makedirs(file_path)
 
-    file = open("/tmp/PostRunInfo.txt", "w")
+    file = open(file_path+"/PostRunInfo.txt", "w")
     file.write("{}\n{}\n{}".format(demo_resource.config['params'][
                'exp_name'], str(start_time), str(end_time)))
     file.close()
