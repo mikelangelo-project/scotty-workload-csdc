@@ -176,6 +176,22 @@ snaptel task create -t asset/snap/datacaching-task.yaml && echo -e "[+] Cloudsui
 
 }
 
+wait_time() {
+if [ "$t" -eq "0" ]; then
+
+    echo -e "[!] The benchmark runs forever "
+    echo -e "Pres CTRL+C to stop..."
+    while :
+    do
+    sleep 1
+	done
+else
+	echo -e "[!] The benchmark takes $t seconds to be completed"
+	sleep $t;
+fi
+
+}
+
 ########################################################################
 #                                                                      #
 #                                 M A I N                              #
@@ -359,6 +375,5 @@ then
 	create_snap_task
 	# stdbuf -o0 snaptel task watch $(snaptel task list | cut -f 1 | tail -n +2 | tail)
 	echo -e "[+] The Benchmark is running in the background"
-	echo -e "[!] The benchmark takes $t seconds to be completed"
-	sleep $t;
+	wait_time
 fi
