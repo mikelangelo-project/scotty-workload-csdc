@@ -1,34 +1,28 @@
-import sys
-import os
-import logging
+#! /usr/bin/env python
 import datetime
-import argparse
-from fabric.api import settings, run as fabric_run, put, env
-from asset.resource_deployment import HeatStack
+import logging
+import os
+
+from fabric.api import put, run as fabric_run, settings
 from scotty import utils
 
 
 logger = logging.getLogger(__name__)
 
 
-class DataCaching():
+class DataCaching(object):
 
-    server_no = ""
-    server_threads = ""
-    memory = ""
-    object_size = ""
-    client_threats = ""
-    interval = ""
-    server_memory = ""
-    scaling_factor = ""
-    duration = ""
-    fraction = ""
-    connection = ""
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def ssh_to(self, root_path, key_path, remote_server):
         logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server, key_filename="/tmp/" + key_path + "/private.key", user="cloud"):
-            fabric_run('[ -d ~/benchmark/cs-datacaching ] || mkdir -p ~/benchmark/cs-datacaching')
+        with settings(host_string=remote_server,
+                      key_filename="/tmp/" + key_path +
+                      "/private.key", user="cloud"):
+            fabric_run(
+                '[ -d ~/benchmark/cs-datacaching ] || mkdir -p ~/benchmark/cs-datacaching')
             put(root_path + '/asset/', '~/benchmark/cs-datacaching/')
             put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
             fabric_run('sudo chmod 750 ~/benchmark/cs-datacaching/benchmark.sh')
@@ -41,12 +35,18 @@ class DataCaching():
             fabric_run('sudo chmod 777 /var/log/benchmark/')
             fabric_run(
                 'sudo echo -e "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" >> /var/log/benchmark/detail.csv')
-            fabric_run("cd ~/benchmark/cs-datacaching/ &&  ./benchmark.sh -a -n " + self.server_no +
-                       " -tt " + self.server_threads + " -mm " + self.memory + " -nn " + self.object_size + " -w " + self.client_threats +
-                       " -T " + self.interval + " -D " + self.server_memory + " -S " + self.scaling_factor +
-                       " -t " + self.duration + " -g " + self.fraction + " -c " +
-                       self.connection
-                       )
+            fabric_run("cd ~/benchmark/cs-datacaching/ && ./benchmark.sh -a -n " +
+                       self.server_no +
+                       " -tt " + self.server_threads +
+                       " -mm " + self.memory +
+                       " -nn " + self.object_size +
+                       " -w " + self.client_threats +
+                       " -T " + self.interval +
+                       " -D " + self.server_memory +
+                       " -S " + self.scaling_factor +
+                       " -t " + self.duration +
+                       " -g " + self.fraction +
+                       " -c " + self.connection)
 
     def metadata(self):
 
@@ -84,44 +84,27 @@ def result(context):
 
 
 def run(context):
-
     workload = context.v1.workload
+    params = workload.config['params']
     experiment_helper = utils.ExperimentHelper(context)
-    demo_resource = experiment_helper.get_resource(
+    resource = experiment_helper.get_resource(
         workload.resources['csdc_res'])
-    dcWorkload = DataCaching()
-    dcWorkload.server_no = str(workload.config[
-        'params']['server_no'])
-    dcWorkload.server_threads = str(workload.config[
-        'params']['server_threads'])
-    dcWorkload.memory = str(workload.config['params']['memory'])
-    dcWorkload.object_size = str(workload.config[
-        'params']['object_size'])
-    dcWorkload.client_threats = str(workload.config[
-        'params']['client_threats'])
-    dcWorkload.interval = str(workload.config['params']['interval'])
-    dcWorkload.server_memory = str(workload.config[
-        'params']['server_memory'])
-    dcWorkload.scaling_factor = str(workload.config[
-        'params']['scaling_factor'])
-    dcWorkload.duration = str(workload.config['params']['duration'])
-    dcWorkload.fraction = str(workload.config['params']['fraction'])
-    dcWorkload.connection = str(workload.config[
-        'params']['connection'])
-    root_path = os.path.abspath('') + "/workload/" + workload.name
-    dcWorkload.metadata()
+    dc_workload = DataCaching(**params)
+    root_path = os.path.join(os.path.dirname(__file__))
+    dc_workload.metadata()
     start_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    dcWorkload.ssh_to(
+    dc_workload.ssh_to(
         root_path,
-        demo_resource.config['params']['exp_name'],
-        demo_resource.endpoint['ip']
+        resource.config['params']['experiment_name'],
+        resource.endpoint['ip']
     )
     end_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    file_path ="/tmp/" + demo_resource.config['params']['exp_name']+ "/" + workload.name
+    file_path = "/tmp/" + \
+        resource.config['params']['experiment_name'] + "/" + workload.name
     if not os.path.exists(file_path):
         os.makedirs(file_path)
 
-    file = open(file_path+"/PostRunInfo.txt", "w")
-    file.write("{}\n{}\n{}".format(demo_resource.config['params'][
-               'exp_name'], str(start_time), str(end_time)))
+    file = open(file_path + "/PostRunInfo.txt", "w")
+    file.write("{}\n{}\n{}".format(resource.config['params'][
+               'experiment_name'], str(start_time), str(end_time)))
     file.close()
