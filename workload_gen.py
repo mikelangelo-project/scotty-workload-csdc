@@ -4,6 +4,7 @@ import logging
 import os
 
 from fabric.api import put, run as fabric_run, settings
+
 from scotty import utils
 
 
@@ -88,7 +89,7 @@ def run(context):
     params = workload.config['params']
     experiment_helper = utils.ExperimentHelper(context)
     resource = experiment_helper.get_resource(
-        workload.resources['csdc_res'])
+        workload.resources['resource'])
     dc_workload = DataCaching(**params)
     root_path = os.path.join(os.path.dirname(__file__))
     dc_workload.metadata()

@@ -36,9 +36,9 @@
           config:
              host: "api.liberty.mikelangelo.gwdg.de"
              port: 8086
-             database: "workload"
+             database: "scheduler"
              retention: "default"
-             user: "msahihi"
-             password: "p4msahihi"
+             user: "scheduler"
+             password: "4scheduler"
              https: true
              skip-verify: false
