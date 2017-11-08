@@ -3,7 +3,8 @@ import datetime
 import logging
 import os
 
-from fabric.api import put, run as fabric_run, settings
+from fabric.api import put, settings
+from fabric.api import run as fb_run
 
 from scotty import utils
 
@@ -19,21 +20,22 @@ class DataCaching(object):
 
     def ssh_to_endpoint(self, root_path, remote_server, private_key, user):
         logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server, key_filename=private_key, user=user):
+        with settings(host_string=remote_server,
+                      key_filename=private_key, user=user):
             put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
-            fabric_run('sudo chmod 750 ~/benchmark/cs-datacaching/benchmark.sh')
-            fabric_run("cd ~/benchmark/cs-datacaching/ && ./benchmark.sh -a -n " +
-                       self.server_no +
-                       " -tt " + self.server_threads +
-                       " -mm " + self.memory +
-                       " -nn " + self.object_size +
-                       " -w " + self.client_threats +
-                       " -T " + self.interval +
-                       " -D " + self.server_memory +
-                       " -S " + self.scaling_factor +
-                       " -t " + self.duration +
-                       " -g " + self.fraction +
-                       " -c " + self.connection)
+            fb_run('sudo chmod 750 ~/benchmark/cs-datacaching/benchmark.sh')
+            fb_run("cd ~/benchmark/cs-datacaching/ && ./benchmark.sh -a -n " +
+                   self.server_no +
+                   " -tt " + self.server_threads +
+                   " -mm " + self.memory +
+                   " -nn " + self.object_size +
+                   " -w " + self.client_threats +
+                   " -T " + self.interval +
+                   " -D " + self.server_memory +
+                   " -S " + self.scaling_factor +
+                   " -t " + self.duration +
+                   " -g " + self.fraction +
+                   " -c " + self.connection)
 
     def metadata(self):
 
