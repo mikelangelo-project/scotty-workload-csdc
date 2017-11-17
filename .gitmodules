@@ -1,0 +1,3 @@
+[submodule "asset/resource_deployment"]
+	path = asset/resource_deployment
+	url = https://gitlab.gwdg.de/mikelangelo/python-heat-stack-deployment
