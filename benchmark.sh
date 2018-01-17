@@ -60,8 +60,7 @@ run_benchmark () {
 create_snap_task() {
 
 echo -e "[+] Creating SNAP Task ....."
-snaptel task create -t asset/snap/datacaching-task.yaml && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
-
+snaptel task create -t asset/snap/datacaching-task.json && echo -e "[+] Cloudsuite-datacaching SNAP Task created and is running"
 }
 
 wait_time() {
