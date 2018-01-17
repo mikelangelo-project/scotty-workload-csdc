@@ -98,3 +98,7 @@ def run(context):
     file.write("{}\n{}\n{}".format(resource.config['params'][
                'experiment_name'], str(start_time), str(end_time)))
     file.close()
+    
+    
+def clean(context):
+    pass
