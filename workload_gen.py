@@ -11,6 +11,19 @@ from scotty import utils
 
 logger = logging.getLogger(__name__)
 
+def reduce_logging():
+    reduce_loggers = {
+        'keystoneauth.identity.v2',
+        'keystoneauth.identity.v2.base',
+        'keystoneauth.session',
+        'urllib3.connectionpool',
+        'stevedore.extension',
+        'novaclient.v2.client',
+        'paramiko.transport'
+    }
+    for logger in reduce_loggers:
+        logging.getLogger(logger).setLevel(logging.WARNING)
+reduce_logging()
 
 class DataCaching(object):
 
