@@ -98,7 +98,6 @@ def run(context):
     wait_file_name = os.path.join(workload_path, params['warmup_file'])
     with open(wait_file_name, "w") as handler:
         handler.write('Server is Warmup\n')
-    print(wait_file_name)
     csdc_workload.run_benchmark(*ssh_access)
     end_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     result_path = os.path.join(
