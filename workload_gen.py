@@ -96,8 +96,6 @@ def run(context):
     resource = experiment_helper.get_resource(
         workload.resources['resource'])
     csdc_workload = DataCachingWorkload(**params)
-    workload_utils = utils.WorkloadUtils(context)
-    workload_path = workload_utils.component_data_path
     root_path = os.path.join(os.path.dirname(__file__))
     csdc_workload.metadata()
     start_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -109,9 +107,9 @@ def run(context):
     ]
     csdc_workload.push_files(*ssh_access)
     csdc_workload.warmp_up(*ssh_access)
-    wait_file_name = os.path.join(workload_path, params['warmup_file'])
-    with open(wait_file_name, "w") as handler:
-        handler.write('Server is Warmup\n')
+    experiment_utils = utils.ExperimentUtils(context)
+    with experiment_utils.open_file(params['warmup_file'], 'w') as f:
+        f.write('Server is warmup\n')
     csdc_workload.run_benchmark(*ssh_access)
     end_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     result_path = os.path.join(
