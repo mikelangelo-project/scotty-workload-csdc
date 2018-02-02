@@ -124,4 +124,7 @@ def run(context):
 
 
 def clean(context):
-    pass
+    experiment_utils = utils.ExperimentUtils(context)
+    workload = context.v1.workload
+    params = workload.config['params']
+    experiment_utils.remove_file(params['warmup_file'])
