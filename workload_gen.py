@@ -34,7 +34,7 @@ class DataCachingWorkload(object):
 
     def push_files(self, root_path, remote_server, private_key, user):
         logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server,
+        with settings(host_string=remote_server, warn_only=True,
                       key_filename=private_key, user=user):
             put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
             put(root_path + '/warmup.sh', '~/benchmark/cs-datacaching/')
@@ -43,7 +43,7 @@ class DataCachingWorkload(object):
 
     def warmp_up(self, root_path, remote_server, private_key, user):
         logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server,
+        with settings(host_string=remote_server, warn_only=True,
                       key_filename=private_key, user=user):
             put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
             fb_run("cd ~/benchmark/cs-datacaching/ && ./warmup.sh -a -n " +
@@ -61,7 +61,7 @@ class DataCachingWorkload(object):
 
     def run_benchmark(self, root_path, remote_server, private_key, user):
         logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server,
+        with settings(host_string=remote_server, warn_only=True,
                       key_filename=private_key, user=user):
             fb_run("cd ~/benchmark/cs-datacaching/ && ./benchmark.sh " + self.duration )
 
