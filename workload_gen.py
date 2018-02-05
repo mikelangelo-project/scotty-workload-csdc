@@ -36,13 +36,8 @@ class DataCachingWorkload(object):
             setattr(self, key, value)
 
     def push_files(self, root_path, remote_server, private_key, user):
-<<<<<<< HEAD
         logging.info("Pushing files to Manager : ")
         with hide('output'), settings(host_string=remote_server,
-=======
-        logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server, warn_only=True,
->>>>>>> 461fba5a28d8aa64d993ab1d1b3e6915db0d3a60
                       key_filename=private_key, user=user):
             put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
             put(root_path + '/warmup.sh', '~/benchmark/cs-datacaching/')
@@ -50,13 +45,8 @@ class DataCachingWorkload(object):
             fb_run('sudo chmod 750 ~/benchmark/cs-datacaching/warmup.sh')
 
     def warmp_up(self, root_path, remote_server, private_key, user):
-<<<<<<< HEAD
         logging.info("Warming up the Server : " + remote_server)
         with hide('output'), settings(host_string=remote_server,
-=======
-        logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server, warn_only=True,
->>>>>>> 461fba5a28d8aa64d993ab1d1b3e6915db0d3a60
                       key_filename=private_key, user=user):
             put(root_path + '/benchmark.sh', '~/benchmark/cs-datacaching/')
             fb_run("cd ~/benchmark/cs-datacaching/ && ./warmup.sh -a -n " +
@@ -73,13 +63,8 @@ class DataCachingWorkload(object):
                    " -c " + self.connection)
 
     def run_benchmark(self, root_path, remote_server, private_key, user):
-<<<<<<< HEAD
         logging.info("Running Benchmark on : " + remote_server)
         with hide('output'), settings(host_string=remote_server,
-=======
-        logging.info("\n# Swarm Manager IP address is : " + remote_server)
-        with settings(host_string=remote_server, warn_only=True,
->>>>>>> 461fba5a28d8aa64d993ab1d1b3e6915db0d3a60
                       key_filename=private_key, user=user):
             fb_run("cd ~/benchmark/cs-datacaching/ && ./benchmark.sh " + self.duration)
 
