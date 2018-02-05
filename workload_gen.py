@@ -108,7 +108,9 @@ def run(context):
     csdc_workload.push_files(*ssh_access)
     csdc_workload.warmp_up(*ssh_access)
     experiment_utils = utils.ExperimentUtils(context)
-    with experiment_utils.open_file(params['warmup_file'], 'w') as f:
+    warmup_file = params.get('warmup_file', 'warm.up')
+    logger.info('Write warmup file: {}'.format(warmup_file))
+    with experiment_utils.open_file(warmup_file, 'w') as f:
         f.write('Server is warmup\n')
     csdc_workload.run_benchmark(*ssh_access)
     end_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -127,4 +129,6 @@ def clean(context):
     experiment_utils = utils.ExperimentUtils(context)
     workload = context.v1.workload
     params = workload.config['params']
-    experiment_utils.remove_file(params['warmup_file'])
+    warmup_file = params.get('warmup_file', 'warm.up')
+    logger.info('Remove warmup file: {}'.format(warmup_file))
+    experiment_utils.remove_file(warmup_file)
