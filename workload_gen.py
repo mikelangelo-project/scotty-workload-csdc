@@ -108,12 +108,9 @@ def run(context):
     experiment_helper = utils.ExperimentHelper(context)
     resource = experiment_helper.get_resource(
         workload.resources['resource'])
-<<<<<<< HEAD
     experiment_name = resource.config['params']['experiment_name']
     workload_utils = utils.WorkloadUtils(context)
     workload_path = workload_utils.component_data_path
-=======
->>>>>>> 461fba5a28d8aa64d993ab1d1b3e6915db0d3a60
     csdc_workload = DataCachingWorkload(**params)
     root_path = os.path.join(os.path.dirname(__file__))
     csdc_workload.metadata()
@@ -126,16 +123,9 @@ def run(context):
     start_time = csdc_workload.get_current_time()
     csdc_workload.push_files(*ssh_access)
     csdc_workload.warmp_up(*ssh_access)
-<<<<<<< HEAD
     wait_file_name = os.path.join(workload_path, params['warmup_file'])
     experiment_utils = utils.ExperimentUtils(context)
     with experiment_utils.open_file(params['warmup_file'], 'w') as f:
-=======
-    experiment_utils = utils.ExperimentUtils(context)
-    warmup_file = params.get('warmup_file', 'warm.up')
-    logger.info('Write warmup file: {}'.format(warmup_file))
-    with experiment_utils.open_file(warmup_file, 'w') as f:
->>>>>>> 461fba5a28d8aa64d993ab1d1b3e6915db0d3a60
         f.write('Server is warmup\n')
     csdc_workload.run_benchmark(*ssh_access)
     end_time = csdc_workload.get_current_time()
